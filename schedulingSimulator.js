@@ -34,6 +34,8 @@ class SchedulerVisualizer {
             n = parseInt(await this.question("Enter the number of processes: "));
             if (isNaN(n) || n <= 0) {
                 console.log("Please enter a positive number for the number of processes.");
+            } else if (n < 0) {
+                console.log("Negative numbers are invalid. Please enter a positive number and try again.");
             } else {
                 break;
             }
@@ -379,19 +381,21 @@ class RoundRobinScheduler {
 }
 
 class MLFQScheduler {
-    constructor(processes, boostTime = 20) {
+    constructor(processes, boostTime = 20, quanta = [4, 8, Infinity], allotments = [8, 16, Infinity]) {
         this.queues = [
-            { quantum: 4, processes: [] },
-            { quantum: 8, processes: [] },
-            { quantum: Infinity, processes: [] }
+            { quantum: quanta[0], processes: [] },
+            { quantum: quanta[1], processes: [] },
+            { quantum: quanta[2], processes: [] }
         ];
+        this.allotments = allotments; 
         this.processes = processes.map(p => ({
             ...p,
             remainingTime: p.burstTime,
             queueLevel: 0,
             responseTime: -1,
             completionTime: 0,
-            turnaroundTime: 0
+            turnaroundTime: 0,
+            timeInQueue: 0 
         }));
         this.completed = [];
         this.boostTime = boostTime;
@@ -409,12 +413,14 @@ class MLFQScheduler {
                     while (this.queues[i].processes.length > 0) {
                         const proc = this.queues[i].processes.shift();
                         proc.queueLevel = 0;
+                        proc.timeInQueue = 0; 
                         this.queues[0].processes.push(proc);
                     }
                 }
                 this.lastBoost = currentTime;
             }
 
+            
             this.processes.forEach(p => {
                 if (p.arrivalTime <= currentTime && !arrived.includes(p) && p.remainingTime > 0) {
                     this.queues[0].processes.push(p);
@@ -434,7 +440,9 @@ class MLFQScheduler {
                 process.responseTime = currentTime - process.arrivalTime;
             }
 
-            let execTime = Math.min(queue.quantum, process.remainingTime);
+            
+            let allotLeft = this.allotments[queueIdx] - process.timeInQueue;
+            let execTime = Math.min(queue.quantum, process.remainingTime, allotLeft);
 
             if (
                 ganttChart.length > 0 &&
@@ -453,6 +461,7 @@ class MLFQScheduler {
             }
 
             process.remainingTime -= execTime;
+            process.timeInQueue += execTime;
             currentTime += execTime;
 
             
@@ -474,10 +483,12 @@ class MLFQScheduler {
                 this.completed.push(process);
             } else {
                 
-                if (queueIdx < this.queues.length - 1) {
+                if (process.timeInQueue >= this.allotments[queueIdx] && queueIdx < this.queues.length - 1) {
                     process.queueLevel = queueIdx + 1;
+                    process.timeInQueue = 0; 
                     this.queues[queueIdx + 1].processes.push(process);
                 } else {
+                    
                     this.queues[queueIdx].processes.push(process);
                 }
             }
