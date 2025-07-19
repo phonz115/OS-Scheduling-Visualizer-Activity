@@ -29,9 +29,17 @@ class SchedulerVisualizer {
         console.log("B. Random Process");
         const inputType = await this.question("Enter your letter of choice (A OR B): ");
 
-        const n = parseInt(await this.question("Enter the number of processes: "));
+        let n;
+        while (true) {
+            n = parseInt(await this.question("Enter the number of processes: "));
+            if (isNaN(n) || n <= 0) {
+                console.log("Please enter a positive number for the number of processes.");
+            } else {
+                break;
+            }
+        }
 
-        if (inputType === '1') {
+        if (inputType.toUpperCase() === 'A') {
             await this.manualInput(n);
         } else {
             await this.randomInput(n);
@@ -56,11 +64,28 @@ class SchedulerVisualizer {
                 await this.runScheduler(new SRTFScheduler(this.processes));
                 break;
             case '4':
-                const timeSlice = parseInt(await this.question("Enter time slice: "));
+                let timeSlice;
+                while (true) {
+                    timeSlice = parseInt(await this.question("Enter time slice: "));
+                    if (isNaN(timeSlice) || timeSlice <= 0) {
+                        console.log("Time slice must be a positive number.");
+                    } else {
+                        break;
+                    }
+                }
                 await this.runScheduler(new RoundRobinScheduler(this.processes, timeSlice));
                 break;
             case '5':
-                await this.runScheduler(new MLFQScheduler(this.processes));
+                let boostTime;
+                while (true) {
+                    boostTime = parseInt(await this.question("Enter boost time (e.g. 20): "));
+                    if (isNaN(boostTime) || boostTime <= 0) {
+                        console.log("Boost time must be a positive number.");
+                    } else {
+                        break;
+                    }
+                }
+                await this.runScheduler(new MLFQScheduler(this.processes, boostTime));
                 break;
             default:
                 console.log("Invalid choice. Please try again!");
@@ -76,8 +101,23 @@ class SchedulerVisualizer {
     async manualInput(n) {
         this.processes = [];
         for (let i = 0; i < n; i++) {
-            const arrival = parseInt(await this.question(`Enter arrival time for P${i}: `));
-            const burst = parseInt(await this.question(`Enter burst time for P${i}: `));
+            let arrival, burst;
+            while (true) {
+                arrival = parseInt(await this.question(`Enter arrival time for P${i}: `));
+                if (isNaN(arrival) || arrival < 0) {
+                    console.log("Arrival time must be a non-negative number.");
+                } else {
+                    break;
+                }
+            }
+            while (true) {
+                burst = parseInt(await this.question(`Enter burst time for P${i}: `));
+                if (isNaN(burst) || burst <= 0) {
+                    console.log("Burst time must be a positive number.");
+                } else {
+                    break;
+                }
+            }
             this.processes.push(new Process(i, arrival, burst));
         }
     }
@@ -232,14 +272,17 @@ class SRTFScheduler {
                 process.responseTime = currentTime - process.arrivalTime;
             }
 
-            if (lastProcessId !== process.id) {
+            if (
+                ganttChart.length > 0 &&
+                ganttChart[ganttChart.length - 1].process === process.id
+            ) {
+                ganttChart[ganttChart.length - 1].end = currentTime + 1;
+            } else {
                 ganttChart.push({
                     process: process.id,
                     start: currentTime,
                     end: currentTime + 1
                 });
-            } else {
-                ganttChart[ganttChart.length - 1].end = currentTime + 1;
             }
 
             process.remainingTime--;
@@ -298,16 +341,23 @@ class RoundRobinScheduler {
 
             const execTime = Math.min(this.timeSlice, process.remainingTime);
 
-            ganttChart.push({
-                process: process.id,
-                start: currentTime,
-                end: currentTime + execTime
-            });
+            if (
+                ganttChart.length > 0 &&
+                ganttChart[ganttChart.length - 1].process === process.id &&
+                ganttChart[ganttChart.length - 1].end === currentTime
+            ) {
+                ganttChart[ganttChart.length - 1].end = currentTime + execTime;
+            } else {
+                ganttChart.push({
+                    process: process.id,
+                    start: currentTime,
+                    end: currentTime + execTime
+                });
+            }
 
             process.remainingTime -= execTime;
             currentTime += execTime;
 
-           
             this.processes.forEach(p => {
                 if (p.arrivalTime > (currentTime - execTime) && p.arrivalTime <= currentTime && !arrived.includes(p)) {
                     queue.push(p);
@@ -328,6 +378,114 @@ class RoundRobinScheduler {
     }
 }
 
+class MLFQScheduler {
+    constructor(processes, boostTime = 20) {
+        this.queues = [
+            { quantum: 4, processes: [] },
+            { quantum: 8, processes: [] },
+            { quantum: Infinity, processes: [] }
+        ];
+        this.processes = processes.map(p => ({
+            ...p,
+            remainingTime: p.burstTime,
+            queueLevel: 0,
+            responseTime: -1,
+            completionTime: 0,
+            turnaroundTime: 0
+        }));
+        this.completed = [];
+        this.boostTime = boostTime;
+        this.lastBoost = 0;
+    }
+
+    schedule() {
+        let currentTime = 0;
+        const ganttChart = [];
+        let arrived = [];
+
+        while (this.completed.length < this.processes.length) {
+            if (currentTime - this.lastBoost >= this.boostTime && currentTime !== 0) {
+                for (let i = 1; i < this.queues.length; i++) {
+                    while (this.queues[i].processes.length > 0) {
+                        const proc = this.queues[i].processes.shift();
+                        proc.queueLevel = 0;
+                        this.queues[0].processes.push(proc);
+                    }
+                }
+                this.lastBoost = currentTime;
+            }
+
+            this.processes.forEach(p => {
+                if (p.arrivalTime <= currentTime && !arrived.includes(p) && p.remainingTime > 0) {
+                    this.queues[0].processes.push(p);
+                    arrived.push(p);
+                }
+            });
+
+            let queueIdx = this.queues.findIndex(q => q.processes.length > 0);
+            if (queueIdx === -1) {
+                currentTime++;
+                continue;
+            }
+            let queue = this.queues[queueIdx];
+            let process = queue.processes.shift();
+
+            if (process.responseTime === -1) {
+                process.responseTime = currentTime - process.arrivalTime;
+            }
+
+            let execTime = Math.min(queue.quantum, process.remainingTime);
+
+            if (
+                ganttChart.length > 0 &&
+                ganttChart[ganttChart.length - 1].process === process.id &&
+                ganttChart[ganttChart.length - 1].end === currentTime &&
+                ganttChart[ganttChart.length - 1].queue === queueIdx
+            ) {
+                ganttChart[ganttChart.length - 1].end = currentTime + execTime;
+            } else {
+                ganttChart.push({
+                    process: process.id,
+                    start: currentTime,
+                    end: currentTime + execTime,
+                    queue: queueIdx
+                });
+            }
+
+            process.remainingTime -= execTime;
+            currentTime += execTime;
+
+            
+            this.processes.forEach(p => {
+                if (
+                    p.arrivalTime > (currentTime - execTime) &&
+                    p.arrivalTime <= currentTime &&
+                    !arrived.includes(p) &&
+                    p.remainingTime > 0
+                ) {
+                    this.queues[0].processes.push(p);
+                    arrived.push(p);
+                }
+            });
+
+            if (process.remainingTime === 0) {
+                process.completionTime = currentTime;
+                process.turnaroundTime = process.completionTime - process.arrivalTime;
+                this.completed.push(process);
+            } else {
+                
+                if (queueIdx < this.queues.length - 1) {
+                    process.queueLevel = queueIdx + 1;
+                    this.queues[queueIdx + 1].processes.push(process);
+                } else {
+                    this.queues[queueIdx].processes.push(process);
+                }
+            }
+        }
+
+        return { ganttChart, processes: this.processes };
+    }
+}
 
 const visualizer = new SchedulerVisualizer();
 visualizer.main().catch(err => console.error(err));
