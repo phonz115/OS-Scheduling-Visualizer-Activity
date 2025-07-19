@@ -240,7 +240,7 @@
                     </tr>
                 </thead>
                 <tbody id="metrics-body">
-                    <!-- Metrics will be added here -->
+                    
                 </tbody>
             </table>
         </div>
@@ -537,7 +537,7 @@
                     process.remainingTime -= execTime;
                     currentTime += execTime;
 
-                    // Add newly arrived processes during execution
+                    
                     this.processes.forEach(p => {
                         if (p.arrivalTime > (currentTime - execTime) &&
                             p.arrivalTime <= currentTime &&
@@ -553,12 +553,12 @@
                         process.turnaroundTime = process.completionTime - process.arrivalTime;
                         this.completed.push(process);
                     } else {
-                        // Demote to lower queue if not in lowest queue
+                        
                         if (queueIdx < this.queues.length - 1) {
                             process.queueLevel = queueIdx + 1;
                             this.queues[queueIdx + 1].processes.push(process);
                         } else {
-                            // If in lowest queue, re-add to end (FCFS)
+                            
                             this.queues[queueIdx].processes.push(process);
                         }
                     }
@@ -568,7 +568,7 @@
             }
         }
 
-        // DOM elements
+       
         const algorithmSelect = document.getElementById('algorithm');
         const quantumGroup = document.getElementById('quantum-group');
         const mlfqControls = document.getElementById('mlfq-controls');
@@ -585,14 +585,14 @@
             '#33FFF3', '#FF8C33', '#8C33FF', '#33FF8C', '#FF338C'
         ];
 
-        // Initialize the table with 3 processes
+        
         function initializeTable() {
             for (let i = 0; i < 3; i++) {
                 addProcessRow(i);
             }
         }
 
-        // Add a process row to the table
+        
         function addProcessRow(index) {
             const row = processTable.insertRow();
             row.innerHTML = `
@@ -603,7 +603,7 @@
             `;
         }
 
-        // Get processes from the table
+        
         function getProcessesFromTable() {
             const processes = [];
             const rows = processTable.rows;
@@ -620,7 +620,7 @@
             return processes;
         }
 
-        // Render Gantt chart
+        
         function renderGanttChart(ganttData) {
             ganttChart.innerHTML = '';
             
@@ -640,7 +640,7 @@
             });
         }
 
-        // Render metrics table
+        
         function renderMetricsTable(processes) {
             metricsBody.innerHTML = '';
             
@@ -656,7 +656,7 @@
                 `;
             });
             
-            // Calculate averages
+            
             const avgTATValue = processes.reduce((sum, p) => sum + p.turnaroundTime, 0) / processes.length;
             const avgRTValue = processes.reduce((sum, p) => sum + p.responseTime, 0) / processes.length;
             
@@ -664,7 +664,6 @@
             avgRT.textContent = avgRTValue.toFixed(2);
         }
 
-        // Algorithm selection change
         algorithmSelect.addEventListener('change', function() {
             quantumGroup.style.display = this.value === 'rr' ? 'block' : 'none';
             mlfqControls.style.display = this.value === 'mlfq' ? 'block' : 'none';
@@ -675,7 +674,7 @@
             addProcessRow(processTable.rows.length);
         });
 
-        // Random processes button
+        
         document.getElementById('random-process').addEventListener('click', function() {
             processTable.innerHTML = '';
             const count = 3 + Math.floor(Math.random() * 4); // 3-6 processes
@@ -684,12 +683,12 @@
             }
         });
 
-        // Clear processes button
+        
         document.getElementById('clear-processes').addEventListener('click', function() {
             processTable.innerHTML = '';
         });
 
-        // Simulate button
+        
         document.getElementById('simulate').addEventListener('click', function() {
             const processes = getProcessesFromTable();
             if (processes.length === 0) {
@@ -734,7 +733,7 @@
             }
         });
 
-        // Reset button
+        /
         document.getElementById('reset').addEventListener('click', function() {
             ganttChart.innerHTML = '<p>Simulation not yet run. Add processes and click "Start Simulation".</p>';
             metricsBody.innerHTML = '';
