@@ -1,5 +1,6 @@
 This project is a JavaScript-based CPU Scheduling Simulator designed to run entirely in the terminal/console. It allows users to explore and visualize various CPU scheduling algorithms, like FIFO, SJF, SRTF, Round Robin, and MLFQ.
 
+
 Instructions:
 1. You are given the chance to choose what input process arrival and burst times by yourself or let the program randomly generate arrival and burst times.
 2. Enter the number of processes (numbers must be positive).
@@ -31,43 +32,53 @@ Limitation: Too small a time slice causes overhead; too large reverts to FIFO.
 5. MLFQ (Multilevel Feedback Queue)
 Type: Preemptive with dynamic priority
 Description: Uses multiple queues with different priority levels and time quanta. Processes start in the highest priority queue and get demoted if they use up their time slice.
-Features: Includes priority boosting to prevent starvation.
 Limitation: Configuration-sensitive; requires careful tuning of queues, quantum, and boost time.
 
-Is not a multi-platform operating system (Windows Command Prompt vs Linux Terminal)
-Uses readline, which functions properly, but the behavior of the terminal, or reading new lines might be different based on the platform they are executed on.
+Sample input and expected output:
+Scheduling Visualizer
 
-CLI options were lacking (silently execute an automated operation, deny some actions, etc.).
+A. Manual Input
+B. Random Process
+Enter your letter of choice (A OR B): A
+Enter the number of processes: 5
 
-2. Absence of I/O Blocking or Context Switching Cost Support
-Processes are modeled as being CPU-bound always on.
+Enter arrival time for P0: 0
+Enter burst time for P0: 4
 
-No model is given on I/O bursts or the contention of context-switch penalty.
+Enter arrival time for P1: 2
+Enter burst time for P1: 2
 
-3. Merely Time-Based Simulation
-Nothing is shown in real time or graph; it's all in a time-constrained model (not driven by a real-world delay-based simulation).
+Enter arrival time for P2: 4
+Enter burst time for P2: 1
 
-4. MLFQ Has Predetermined Queue Levels and Parameters
-These cannot be modified:
+Enter arrival time for P3: 5
+Enter burst time for P3: 3
 
--NumberOf queues
+Enter arrival time for P4: 6
+Enter burst time for P4: 2
 
--Quantum per level
+Choose a Scheduling Algorithm:
+1. FIFO
+2. SJF
+3. SRTF
+4. Round Robin
+5. MLFQ
+6. Priority
+Enter your choice (1-6): 4
+Enter time slice: 2
 
--Allotment per level,
+Gantt Chart:
+P0 [0-2] -> P1 [2-4] -> P0 [4-6] -> P2 [6-7] -> P3 [7-9] -> P4 [9-11] -> P3 [11-12]
 
-They are hardcoded; say, quanta = [4, 8, Infinity], etc., on closer inspection.
+Process Metrics:
+PID     Arrival Burst   Finish  TAT     Response
+P0      0       4       6       6       0
+P1      2       2       4       2       0
+P2      4       1       7       3       2
+P3      5       3       12      7       2
+P4      6       2       11      5       3
 
-5. No Logging to File / Exporting Output
-Only results are given on the console screen.
+Average Turnaround Time: 4.6  
+Average Response Time: 1.4
 
-You cannot save the Gantt Chart or metrics in a .txt file or a .csv file.
 
-🚧 Incomplete / Missing Features
-1. Not able to change the name of the Process ID or Rename them to Something Else
-The name of a process is fixed to P0, P1, ... and so on.
-
-Users cannot name or label them (LoginTask, Renderer, etc.).
-
-2. Input Validation Lacks Non-numeric Entries
-Example: If user enters a or blank space for burst time, it only checks isNaN, not whether it'
