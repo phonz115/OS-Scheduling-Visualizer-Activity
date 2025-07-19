@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPU Scheduling Visualizer</title>
+    <style>
+        :root {
+            --mercedes-teal: #00D2BE;
+            --mercedes-black: #000000;
+            --mercedes-silver: #6C6C6C;
+            --mercedes-accent: #FFD700;
+            --mercedes-red: #FF0000;
+            --mercedes-dark: #1E1E1E;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--mercedes-dark);
+            color: white;
+            background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(30, 30, 30, 0.9));
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--mercedes-teal);
+            background-color: var(--mercedes-black);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header h1 {
+            color: var(--mercedes-teal);
+            margin: 0;
+            font-size: 2.2em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 210, 190, 0.5);
+        }
+        
+        .developer {
+            color: var(--mercedes-silver);
+            font-style: italic;
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .control-panel, .visualization {
+            background-color: var(--mercedes-black);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--mercedes-teal);
+        }
+        
+        .control-panel {
+            flex: 1;
+        }
+        
+        .visualization {
+            flex: 2;
+        }
+        
+        h2, h3 {
+            color: var(--mercedes-teal);
+            border-bottom: 1px solid var(--mercedes-teal);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            background-color: rgba(30, 30, 30, 0.7);
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--mercedes-teal);
+        }
+        
+        th {
+            background-color: var(--mercedes-black);
+            color: var(--mercedes-teal);
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background-color: rgba(0, 210, 190, 0.1);
+        }
+        
+        input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid var(--mercedes-teal);
+            border-radius: 4px;
+            background-color: var(--mercedes-dark);
+            color: white;
+        }
+        
+        select {
+            padding: 5px;
+            border: 1px solid var(--mercedes-teal);
+            border-radius: 4px;
+            background-color: var(--mercedes-dark);
+            color: white;
+        }
+        
+        button {
+            background-color: var(--mercedes-teal);
+            color: var(--mercedes-black);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background-color: var(--mercedes-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+        }
+        
+        .btn-group {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .gantt-chart {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+            background-color: var(--mercedes-dark);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            min-height: 60px;
+            border: 1px solid var(--mercedes-teal);
+        }
+        
+        .gantt-box {
+            padding: 8px;
+            border-radius: 4px;
+            background-color: var(--mercedes-teal);
+            text-align: center;
+            min-width: 40px;
+            position: relative;
+            color: var(--mercedes-black);
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        
+        .gantt-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(0, 210, 190, 0.7);
+        }
+        
+        .gantt-box:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--mercedes-black);
+            color: var(--mercedes-teal);
+            padding: 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            z-index: 100;
+            border: 1px solid var(--mercedes-teal);
+            font-weight: normal;
+        }
+        
+        .metrics {
+            margin-top: 20px;
+            background-color: rgba(30, 30, 30, 0.7);
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid var(--mercedes-teal);
+        }
+        
+        .metrics p {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .metrics p span {
+            font-weight: bold;
+            color: var(--mercedes-teal);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(0, 210, 190, 0.1);
+            border-radius: 4px;
+            border-left: 4px solid var(--mercedes-teal);
+        }
+        
+        .algorithm-controls {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(30, 30, 30, 0.7);
+            border-radius: 4px;
+            border: 1px solid var(--mercedes-teal);
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .speed-control input {
+            width: 100px;
+            margin: 0 10px;
+        }
+        
+        .progress-container {
+            margin-top: 10px;
+            background-color: rgba(30, 30, 30, 0.7);
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid var(--mercedes-teal);
+        }
+        
+        progress {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background-color: var(--mercedes-dark);
+        }
+        
+        progress::-webkit-progress-bar {
+            background-color: var(--mercedes-dark);
+            border-radius: 5px;
+        }
+        
+        progress::-webkit-progress-value {
+            background-color: var(--mercedes-teal);
+            border-radius: 5px;
+        }
+        
+        progress::-moz-progress-bar {
+            background-color: var(--mercedes-teal);
+            border-radius: 5px;
+        }
+        
+        .error {
+            color: var(--mercedes-red);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .process-input {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .process-input label {
+            margin-right: 10px;
+            min-width: 100px;
+            color: var(--mercedes-teal);
+        }
+        
+        #process-count {
+            width: 60px;
+        }
+        
+        .metrics-table {
+            margin-top: 20px;
+            width: 100%;
+            background-color: rgba(30, 30, 30, 0.7);
+        }
+        
+        .metrics-table th {
+            background-color: var(--mercedes-black);
+            color: var(--mercedes-teal);
+        }
+        
+        /* F1-inspired accents */
+        .f1-accent {
+            position: relative;
+        }
+        
+        .f1-accent::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--mercedes-teal), var(--mercedes-accent));
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .control-panel, .visualization {
+                flex: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header f1-accent">
+        <h1>CPU Scheduling Visualizer</h1>
+        <p class="developer">Developed by: VIOLDAN E. BAYOCOT</p>
+    </div>
+
+    <div class="container">
+        <div class="control-panel">
+            <h2>Process Control</h2>
+            
+            <div class="process-input">
+                <label for="input-type">Input Type:</label>
+                <select id="input-type">
+                    <option value="manual">Manual Input</option>
+                    <option value="random">Random Processes</option>
+                </select>
+            </div>
+            
+            <div class="process-input">
+                <label for="process-count">Number of Processes:</label>
+                <input type="number" id="process-count" min="1" value="5">
+            </div>
+
+            <div class="btn-group">
+                <button id="generate-processes">Generate Processes</button>
+                <button id="clear-processes">Clear All</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Process</th>
+                        <th>Arrival Time</th>
+                        <th>Exec. Time</th>
+                        <th>Priority</th>
+                    </tr>
+                </thead>
+                <tbody id="process-table">
+                    <!-- Processes will be added here -->
+                </tbody>
+            </table>
+
+            <div class="algorithm-controls">
+                <h3>Scheduling Algorithm</h3>
+                <select id="algorithm">
+                    <option value="fifo">First-Come First-Served (FIFO)</option>
+                    <option value="sjf">Shortest Job First (SJF)</option>
+                    <option value="srtf">Shortest Remaining Time First (SRTF)</option>
+                    <option value="rr">Round Robin</option>
+                    <option value="mlfq">Multilevel Feedback Queue (MLFQ)</option>
+                </select>
+
+                <div id="rr-controls" style="display: none; margin-top: 10px;">
+                    <label for="quantum">Time Quantum:</label>
+                    <input type="number" id="quantum" min="1" value="4">
+                </div>
+
+                <div id="mlfq-controls" style="display: none; margin-top: 10px;">
+                    <label>MLFQ Time Slices:</label>
+                    <div>
+                        Q0: <input type="number" class="mlfq-quantum" min="1" value="4">
+                        Q1: <input type="number" class="mlfq-quantum" min="1" value="8">
+                        Q2: <input type="number" class="mlfq-quantum" min="1" value="16">
+                    </div>
+                    <label>MLFQ Allotments:</label>
+                    <div>
+                        Q0: <input type="number" class="mlfq-allotment" min="1" value="8">
+                        Q1: <input type="number" class="mlfq-allotment" min="1" value="16">
+                        Q2: <input type="number" class="mlfq-allotment" min="1" value="9999">
+                    </div>
+                    <label for="boost-time">Boost Time:</label>
+                    <input type="number" id="boost-time" min="1" value="20">
+                </div>
+            </div>
+
+            <div class="status">
+                <p>Action Message: <span id="action-message">No Errors.</span></p>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <h2>Simulation Results</h2>
+            
+            <h3>Gantt Chart (Each box represents a second)</h3>
+            <div class="gantt-chart" id="gantt-chart">
+                <p>No simulation data available. Run simulation to see results.</p>
+            </div>
+
+            <div class="metrics">
+                <h3>Performance Metrics</h3>
+                <p>Average Waiting Time: <span id="avg-wait">--</span></p>
+                <p>Average Turnaround Time: <span id="avg-tat">--</span></p>
+                <p>Average Response Time: <span id="avg-rt">--</span></p>
+                <p>Total Execution Time: <span id="total-exec">--</span></p>
+            </div>
+
+            <div class="speed-control">
+                <label>Simulation Speed:</label>
+                <input type="range" id="sim-speed" min="0.1" max="2" step="0.1" value="1">
+                <span id="speed-value">1.0x</span>
+            </div>
+
+            <div class="progress-container">
+                <p>CPU: <span id="cpu-status">--</span></p>
+                <p>Next Queue: <span id="next-queue">--</span></p>
+                <p>Overall Progress: <span id="progress-percent">0</span>%</p>
+                <progress id="progress-bar" value="0" max="100"></progress>
+            </div>
+
+            <div class="btn-group">
+                <button id="simulate">Simulate</button>
+                <button id="reset">Reset All</button>
+            </div>
+
+            <!-- Metrics Table Added Here -->
+            <div class="metrics-table-container">
+                <h3>Detailed Process Metrics</h3>
+                <table class="metrics-table" id="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>Arrival Time</th>
+                            <th>Burst Time</th>
+                            <th>Completion Time</th>
+                            <th>Turnaround Time</th>
+                            <th>Waiting Time</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metrics-body">
+                        <!-- Metrics data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const readline = require('readline');
+
+class Process {
+    constructor(id, arrivalTime, burstTime) {
+        this.id = id;
+        this.arrivalTime = arrivalTime;
+        this.burstTime = burstTime;
+        this.remainingTime = burstTime;
+        this.completionTime = 0;
+        this.turnaroundTime = 0;
+        this.responseTime = -1;
+        this.priorityLevel = 0;
+        this.timeInQueue = 0;
+    }
+}
+
+class SchedulerVisualizer {
+    constructor() {
+        this.rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+        });
+        this.processes = [];
+    }
+
+    async main() {
+        console.log("Scheduling Visualizer\n");
+        console.log("A. Manual Input");
+        console.log("B. Random Process");
+        const inputType = await this.question("Enter your letter of choice (A OR B): ");
+
+        let n;
+        while (true) {
+            n = parseInt(await this.question("Enter the number of processes: "));
+            if (isNaN(n) || n <= 0) {
+                console.log("Please enter a positive number for the number of processes.");
+            } else if (n < 0) {
+                console.log("Negative numbers are invalid. Please enter a positive number and try again.");
+            } else {
+                break;
+            }
+        }
+
+        if (inputType.toUpperCase() === 'A') {
+            await this.manualInput(n);
+        } else {
+            await this.randomInput(n);
+        }
+
+        console.log("\nChoose a Scheduling Algorithm:");
+        console.log("1. FIFO");
+        console.log("2. SJF");
+        console.log("3. SRTF");
+        console.log("4. Round Robin");
+        console.log("5. MLFQ");
+        const choice = await this.question("Enter your choice (1-5): ");
+
+        switch(choice) {
+            case '1':
+                await this.runScheduler(new FIFOScheduler(this.processes));
+                break;
+            case '2':
+                await this.runScheduler(new SJFScheduler(this.processes));
+                break;
+            case '3':
+                await this.runScheduler(new SRTFScheduler(this.processes));
+                break;
+            case '4':
+                let timeSlice;
+                while (true) {
+                    timeSlice = parseInt(await this.question("Enter time slice: "));
+                    if (isNaN(timeSlice) || timeSlice <= 0) {
+                        console.log("Time slice must be a positive number.");
+                    } else {
+                        break;
+                    }
+                }
+                await this.runScheduler(new RoundRobinScheduler(this.processes, timeSlice));
+                break;
+            case '5':
+                let boostTime;
+                while (true) {
+                    boostTime = parseInt(await this.question("Enter boost time (e.g. 20): "));
+                    if (isNaN(boostTime) || boostTime <= 0) {
+                        console.log("Boost time must be a positive number.");
+                    } else {
+                        break;
+                    }
+                }
+                await this.runScheduler(new MLFQScheduler(this.processes, boostTime));
+                break;
+            default:
+                console.log("Invalid choice. Please try again!");
+        }
+
+        this.rl.close();
+    }
+
+    async question(prompt) {
+        return new Promise(resolve => this.rl.question(prompt, resolve));
+    }
+
+    async manualInput(n) {
+        this.processes = [];
+        for (let i = 0; i < n; i++) {
+            let arrival, burst;
+            while (true) {
+                arrival = parseInt(await this.question(`Enter arrival time for P${i}: `));
+                if (isNaN(arrival) || arrival < 0) {
+                    console.log("Arrival time must be a non-negative number.");
+                } else {
+                    break;
+                }
+            }
+            while (true) {
+                burst = parseInt(await this.question(`Enter burst time for P${i}: `));
+                if (isNaN(burst) || burst <= 0) {
+                    console.log("Burst time must be a positive number.");
+                } else {
+                    break;
+                }
+            }
+            this.processes.push(new Process(i, arrival, burst));
+        }
+    }
+
+    async randomInput(n) {
+        this.processes = [];
+        for (let i = 0; i < n; i++) {
+            const arrival = Math.floor(Math.random() * 10);
+            const burst = Math.floor(Math.random() * 10) + 1;
+            console.log(`P${i} - Arrival: ${arrival}, Burst: ${burst}`);
+            this.processes.push(new Process(i, arrival, burst));
+        }
+    }
+
+    async runScheduler(scheduler) {
+        const result = scheduler.schedule();
+        console.log("\nGantt Chart:");
+        console.log(result.ganttChart.map(entry => 
+            `P${entry.process} [${entry.start}-${entry.end}]`).join(" -> "));
+        
+        console.log("\nProcess Metrics:");
+        console.log("PID\tArrival\tBurst\tFinish\tTAT\tResponse");
+        result.processes.forEach(p => {
+            console.log(`P${p.id}\t${p.arrivalTime}\t${p.burstTime}\t${p.completionTime}\t${p.turnaroundTime}\t${p.responseTime}`);
+        });
+        
+        const avgTAT = result.processes.reduce((sum, p) => sum + p.turnaroundTime, 0) / result.processes.length;
+        const avgRT = result.processes.reduce((sum, p) => sum + p.responseTime, 0) / result.processes.length;
+        console.log(`\nAverage Turnaround Time: ${avgTAT.toFixed(2)}`);
+        console.log(`Average Response Time: ${avgRT.toFixed(2)}`);
+    }
+}
+
+class FIFOScheduler {
+    constructor(processes) {
+        this.processes = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
+    }
+    
+    schedule() {
+        let currentTime = 0;
+        const ganttChart = [];
+        
+        for (const process of this.processes) {
+            if (currentTime < process.arrivalTime) {
+                currentTime = process.arrivalTime;
+            }
+            
+            if (process.responseTime === -1) {
+                process.responseTime = currentTime - process.arrivalTime;
+            }
+            
+            ganttChart.push({
+                process: process.id,
+                start: currentTime,
+                end: currentTime + process.burstTime
+            });
+            
+            currentTime += process.burstTime;
+            process.completionTime = currentTime;
+            process.turnaroundTime = process.completionTime - process.arrivalTime;
+        }
+        
+        return { ganttChart, processes: this.processes };
+    }
+}
+
+class SJFScheduler {
+    constructor(processes) {
+        this.processes = processes.map(p => ({
+            ...p,
+            remainingTime: p.burstTime,
+            responseTime: -1,
+            completionTime: 0,
+            turnaroundTime: 0
+        }));
+    }
+    
+    schedule() {
+        let currentTime = 0;
+        const ganttChart = [];
+        const completed = [];
+        const readyQueue = [];
+        
+        while (completed.length < this.processes.length) {
+            this.processes.forEach(p => {
+                if (p.arrivalTime <= currentTime && !completed.includes(p) && !readyQueue.includes(p)) {
+                    readyQueue.push(p);
+                }
+            });
+            
+            if (readyQueue.length === 0) {
+                currentTime++;
+                continue;
+            }
+            
+            readyQueue.sort((a, b) => a.burstTime - b.burstTime);
+            const process = readyQueue.shift();
+            
+            if (process.responseTime === -1) {
+                process.responseTime = currentTime - process.arrivalTime;
+            }
+            
+            ganttChart.push({
+                process: process.id,
+                start: currentTime,
+                end: currentTime + process.burstTime
+            });
+            
+            currentTime += process.burstTime;
+            process.completionTime = currentTime;
+            process.turnaroundTime = process.completionTime - process.arrivalTime;
+            completed.push(process);
+        }
+        
+        return { ganttChart, processes: this.processes };
+    }
+}
+
+class SRTFScheduler {
+    constructor(processes) {
+        this.processes = processes.map(p => ({
+            ...p,
+            remainingTime: p.burstTime,
+            responseTime: -1,
+            completionTime: 0,
+            turnaroundTime: 0
+        }));
+    }
+
+    schedule() {
+        let currentTime = 0;
+        const ganttChart = [];
+        const completed = [];
+        let lastProcessId = null;
+
+        while (completed.length < this.processes.length) {
+            const readyQueue = this.processes.filter(p =>
+                p.arrivalTime <= currentTime &&
+                p.remainingTime > 0 &&
+                !completed.includes(p)
+            );
+
+            if (readyQueue.length === 0) {
+                currentTime++;
+                continue;
+            }
+
+            readyQueue.sort((a, b) => a.remainingTime - b.remainingTime);
+            const process = readyQueue[0];
+
+            if (process.responseTime === -1) {
+                process.responseTime = currentTime - process.arrivalTime;
+            }
+
+            if (
+                ganttChart.length > 0 &&
+                ganttChart[ganttChart.length - 1].process === process.id
+            ) {
+                ganttChart[ganttChart.length - 1].end = currentTime + 1;
+            } else {
+                ganttChart.push({
+                    process: process.id,
+                    start: currentTime,
+                    end: currentTime + 1
+                });
+            }
+
+            process.remainingTime--;
+            currentTime++;
+            lastProcessId = process.id;
+
+            if (process.remainingTime === 0) {
+                process.completionTime = currentTime;
+                process.turnaroundTime = process.completionTime - process.arrivalTime;
+                completed.push(process);
+            }
+        }
+
+        return { ganttChart, processes: this.processes };
+    }
+}
+
+class RoundRobinScheduler {
+    constructor(processes, timeSlice) {
+        this.processes = processes.map(p => ({
+            ...p,
+            remainingTime: p.burstTime,
+            responseTime: -1,
+            completionTime: 0,
+            turnaroundTime: 0
+        }));
+        this.timeSlice = timeSlice;
+    }
+
+    schedule() {
+        let currentTime = 0;
+        const ganttChart = [];
+        const queue = [];
+        const completed = [];
+        let arrived = [];
+
+        while (completed.length < this.processes.length) {
+            
+            this.processes.forEach(p => {
+                if (p.arrivalTime <= currentTime && !arrived.includes(p)) {
+                    queue.push(p);
+                    arrived.push(p);
+                }
+            });
+
+            if (queue.length === 0) {
+                currentTime++;
+                continue;
+            }
+
+            const process = queue.shift();
+
+            if (process.responseTime === -1) {
+                process.responseTime = currentTime - process.arrivalTime;
+            }
+
+            const execTime = Math.min(this.timeSlice, process.remainingTime);
+
+            if (
+                ganttChart.length > 0 &&
+                ganttChart[ganttChart.length - 1].process === process.id &&
+                ganttChart[ganttChart.length - 1].end === currentTime
+            ) {
+                ganttChart[ganttChart.length - 1].end = currentTime + execTime;
+            } else {
+                ganttChart.push({
+                    process: process.id,
+                    start: currentTime,
+                    end: currentTime + execTime
+                });
+            }
+
+            process.remainingTime -= execTime;
+            currentTime += execTime;
+
+            this.processes.forEach(p => {
+                if (p.arrivalTime > (currentTime - execTime) && p.arrivalTime <= currentTime && !arrived.includes(p)) {
+                    queue.push(p);
+                    arrived.push(p);
+                }
+            });
+
+            if (process.remainingTime === 0) {
+                process.completionTime = currentTime;
+                process.turnaroundTime = process.completionTime - process.arrivalTime;
+                completed.push(process);
+            } else {
+                queue.push(process);
+            }
+        }
+
+        return { ganttChart, processes: this.processes };
+    }
+}
+
+class MLFQScheduler {
+    constructor(processes, boostTime = 20, quanta = [4, 8, Infinity], allotments = [8, 16, Infinity]) {
+        this.queues = [
+            { quantum: quanta[0], processes: [] },
+            { quantum: quanta[1], processes: [] },
+            { quantum: quanta[2], processes: [] }
+        ];
+        this.allotments = allotments; 
+        this.processes = processes.map(p => ({
+            ...p,
+            remainingTime: p.burstTime,
+            queueLevel: 0,
+            responseTime: -1,
+            completionTime: 0,
+            turnaroundTime: 0,
+            timeInQueue: 0 
+        }));
+        this.completed = [];
+        this.boostTime = boostTime;
+        this.lastBoost = 0;
+    }
+
+    schedule() {
+        let currentTime = 0;
+        const ganttChart = [];
+        let arrived = [];
+
+        while (this.completed.length < this.processes.length) {
+            if (currentTime - this.lastBoost >= this.boostTime && currentTime !== 0) {
+                for (let i = 1; i < this.queues.length; i++) {
+                    while (this.queues[i].processes.length > 0) {
+                        const proc = this.queues[i].processes.shift();
+                        proc.queueLevel = 0;
+                        proc.timeInQueue = 0; 
+                        this.queues[0].processes.push(proc);
+                    }
+                }
+                this.lastBoost = currentTime;
+            }
+
+            
+            this.processes.forEach(p => {
+                if (p.arrivalTime <= currentTime && !arrived.includes(p) && p.remainingTime > 0) {
+                    this.queues[0].processes.push(p);
+                    arrived.push(p);
+                }
+            });
+
+            let queueIdx = this.queues.findIndex(q => q.processes.length > 0);
+            if (queueIdx === -1) {
+                currentTime++;
+                continue;
+            }
+            let queue = this.queues[queueIdx];
+            let process = queue.processes.shift();
+
+            if (process.responseTime === -1) {
+                process.responseTime = currentTime - process.arrivalTime;
+            }
+
+            
+            let allotLeft = this.allotments[queueIdx] - process.timeInQueue;
+            let execTime = Math.min(queue.quantum, process.remainingTime, allotLeft);
+
+            if (
+                ganttChart.length > 0 &&
+                ganttChart[ganttChart.length - 1].process === process.id &&
+                ganttChart[ganttChart.length - 1].end === currentTime &&
+                ganttChart[ganttChart.length - 1].queue === queueIdx
+            ) {
+                ganttChart[ganttChart.length - 1].end = currentTime + execTime;
+            } else {
+                ganttChart.push({
+                    process: process.id,
+                    start: currentTime,
+                    end: currentTime + execTime,
+                    queue: queueIdx
+                });
+            }
+
+            process.remainingTime -= execTime;
+            process.timeInQueue += execTime;
+            currentTime += execTime;
+
+            
+            this.processes.forEach(p => {
+                if (
+                    p.arrivalTime > (currentTime - execTime) &&
+                    p.arrivalTime <= currentTime &&
+                    !arrived.includes(p) &&
+                    p.remainingTime > 0
+                ) {
+                    this.queues[0].processes.push(p);
+                    arrived.push(p);
+                }
+            });
+
+            if (process.remainingTime === 0) {
+                process.completionTime = currentTime;
+                process.turnaroundTime = process.completionTime - process.arrivalTime;
+                this.completed.push(process);
+            } else {
+                
+                if (process.timeInQueue >= this.allotments[queueIdx] && queueIdx < this.queues.length - 1) {
+                    process.queueLevel = queueIdx + 1;
+                    process.timeInQueue = 0; 
+                    this.queues[queueIdx + 1].processes.push(process);
+                } else {
+                    
+                    this.queues[queueIdx].processes.push(process);
+                }
+            }
+        }
+
+        return { ganttChart, processes: this.processes };
+    }
+}
+
+const visualizer = new SchedulerVisualizer();
+visualizer.main().catch(err => console.error(err));
+    </script>
+</body>
+</html>
