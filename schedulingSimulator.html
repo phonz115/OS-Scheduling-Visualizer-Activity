@@ -162,12 +162,20 @@
         #process-count {
             width: 60px;
         }
+        .metrics-table {
+            margin-top: 20px;
+            width: 100%;
+        }
+        .metrics-table th {
+            background-color: #4a6fa5;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>CPU Scheduling Visualizer</h1>
-        <p class="developer">Developed by: Alphonsus Jose A. Credo</p>
+        <p class="developer">Developed by: VIOLDAN E. BAYOCOT</p>
     </div>
 
     <div class="container">
@@ -203,7 +211,7 @@
                     </tr>
                 </thead>
                 <tbody id="process-table">
-                    
+                    <!-- Processes will be added here -->
                 </tbody>
             </table>
 
@@ -228,6 +236,12 @@
                         Q0: <input type="number" class="mlfq-quantum" min="1" value="4">
                         Q1: <input type="number" class="mlfq-quantum" min="1" value="8">
                         Q2: <input type="number" class="mlfq-quantum" min="1" value="16">
+                    </div>
+                    <label>MLFQ Allotments:</label>
+                    <div>
+                        Q0: <input type="number" class="mlfq-allotment" min="1" value="8">
+                        Q1: <input type="number" class="mlfq-allotment" min="1" value="16">
+                        Q2: <input type="number" class="mlfq-allotment" min="1" value="9999">
                     </div>
                     <label for="boost-time">Boost Time:</label>
                     <input type="number" id="boost-time" min="1" value="20">
@@ -255,12 +269,6 @@
                 <p>Total Execution Time: <span id="total-exec">--</span></p>
             </div>
 
-            <div class="speed-control">
-                <label>Simulation Speed:</label>
-                <input type="range" id="sim-speed" min="0.1" max="2" step="0.1" value="1">
-                <span id="speed-value">1.0x</span>
-            </div>
-
             <div class="progress-container">
                 <p>CPU: <span id="cpu-status">--</span></p>
                 <p>Next Queue: <span id="next-queue">--</span></p>
@@ -271,6 +279,27 @@
             <div class="btn-group">
                 <button id="simulate">Simulate</button>
                 <button id="reset">Reset All</button>
+            </div>
+
+            <!-- Metrics Table Added Here -->
+            <div class="metrics-table-container">
+                <h3>Detailed Process Metrics</h3>
+                <table class="metrics-table" id="metrics-table">
+                    <thead>
+                        <tr>
+                            <th>Process</th>
+                            <th>Arrival Time</th>
+                            <th>Burst Time</th>
+                            <th>Completion Time</th>
+                            <th>Turnaround Time</th>
+                            <th>Waiting Time</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="metrics-body">
+                        <!-- Metrics data will be inserted here -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -532,7 +561,8 @@
                     responseTime: -1,
                     completionTime: 0,
                     turnaroundTime: 0,
-                    timeInQueue: 0 
+                    timeInQueue: 0,
+                    allotmentUsed: 0
                 }));
                 this.completed = [];
                 this.boostTime = boostTime;
@@ -545,19 +575,21 @@
                 let arrived = [];
 
                 while (this.completed.length < this.processes.length) {
+                    // Boost all processes to top queue if boost time reached
                     if (currentTime - this.lastBoost >= this.boostTime && currentTime !== 0) {
                         for (let i = 1; i < this.queues.length; i++) {
                             while (this.queues[i].processes.length > 0) {
                                 const proc = this.queues[i].processes.shift();
                                 proc.queueLevel = 0;
-                                proc.timeInQueue = 0; 
+                                proc.timeInQueue = 0;
+                                proc.allotmentUsed = 0;
                                 this.queues[0].processes.push(proc);
                             }
                         }
                         this.lastBoost = currentTime;
                     }
 
-                    
+                    // Add arriving processes to top queue
                     this.processes.forEach(p => {
                         if (p.arrivalTime <= currentTime && !arrived.includes(p) && p.remainingTime > 0) {
                             this.queues[0].processes.push(p);
@@ -565,22 +597,26 @@
                         }
                     });
 
+                    // Find the highest priority non-empty queue
                     let queueIdx = this.queues.findIndex(q => q.processes.length > 0);
                     if (queueIdx === -1) {
                         currentTime++;
                         continue;
                     }
+                    
                     let queue = this.queues[queueIdx];
                     let process = queue.processes.shift();
 
+                    // Set response time if this is the first time the process runs
                     if (process.responseTime === -1) {
                         process.responseTime = currentTime - process.arrivalTime;
                     }
 
-                    
-                    let allotLeft = this.allotments[queueIdx] - process.timeInQueue;
+                    // Calculate execution time (minimum of quantum, remaining time, and remaining allotment)
+                    let allotLeft = this.allotments[queueIdx] - process.allotmentUsed;
                     let execTime = Math.min(queue.quantum, process.remainingTime, allotLeft);
 
+                    // Update Gantt chart
                     if (
                         ganttChart.length > 0 &&
                         ganttChart[ganttChart.length - 1].process === process.id &&
@@ -593,15 +629,19 @@
                             process: process.id,
                             start: currentTime,
                             end: currentTime + execTime,
-                            queue: queueIdx
+                            queue: queueIdx,
+                            allotmentUsed: process.allotmentUsed,
+                            allotmentLeft: allotLeft - execTime
                         });
                     }
 
+                    // Update process state
                     process.remainingTime -= execTime;
                     process.timeInQueue += execTime;
+                    process.allotmentUsed += execTime;
                     currentTime += execTime;
 
-                    
+                    // Add any new arrivals during this execution
                     this.processes.forEach(p => {
                         if (
                             p.arrivalTime > (currentTime - execTime) &&
@@ -614,18 +654,20 @@
                         }
                     });
 
+                    // Handle process completion or requeueing
                     if (process.remainingTime === 0) {
                         process.completionTime = currentTime;
                         process.turnaroundTime = process.completionTime - process.arrivalTime;
                         this.completed.push(process);
                     } else {
-                        
-                        if (process.timeInQueue >= this.allotments[queueIdx] && queueIdx < this.queues.length - 1) {
+                        // Check if process used up its allotment and should be demoted
+                        if (process.allotmentUsed >= this.allotments[queueIdx] && queueIdx < this.queues.length - 1) {
                             process.queueLevel = queueIdx + 1;
-                            process.timeInQueue = 0; 
+                            process.timeInQueue = 0;
+                            process.allotmentUsed = 0;
                             this.queues[queueIdx + 1].processes.push(process);
                         } else {
-                            
+                            // Otherwise, put it back in the same queue
                             this.queues[queueIdx].processes.push(process);
                         }
                     }
@@ -660,14 +702,15 @@
         const progressBar = document.getElementById('progress-bar');
         const simSpeed = document.getElementById('sim-speed');
         const speedValue = document.getElementById('speed-value');
+        const metricsBody = document.getElementById('metrics-body');
 
-        
+        // Process colors
         const processColors = [
             '#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3', 
             '#33FFF3', '#FF8C33', '#8C33FF', '#33FF8C', '#FF338C'
         ];
 
-        
+        // Initialize the table with processes
         function initializeTable() {
             processTable.innerHTML = '';
             const count = parseInt(processCountInput.value) || 5;
@@ -677,7 +720,7 @@
             }
         }
 
-        
+        // Add a process row to the table
         function addProcessRow(index) {
             const row = processTable.insertRow();
             const arrival = Math.floor(Math.random() * 10);
@@ -693,7 +736,7 @@
             `;
         }
 
-        
+        // Get processes from the table
         function getProcessesFromTable() {
             const processes = [];
             const rows = processTable.rows;
@@ -724,7 +767,7 @@
             return processes;
         }
 
-        
+        // Render Gantt chart
         function renderGanttChart(ganttData) {
             ganttChart.innerHTML = '';
             
@@ -740,48 +783,75 @@
                     box.className = 'gantt-box';
                     box.textContent = `P${entry.process}`;
                     box.style.backgroundColor = processColors[entry.process % processColors.length];
-                    box.title = `Time ${entry.start + i}: P${entry.process}`;
+                    
+                    // Build tooltip with detailed information
+                    let tooltip = `Time ${entry.start + i}: P${entry.process}`;
                     if (entry.queue !== undefined) {
-                        box.title += ` (Q${entry.queue})`;
+                        tooltip += ` (Q${entry.queue})`;
                     }
+                    if (entry.allotmentUsed !== undefined) {
+                        tooltip += `\nAllotment used: ${entry.allotmentUsed}/${this.allotments ? this.allotments[entry.queue] : 'N/A'}`;
+                    }
+                    if (entry.allotmentLeft !== undefined) {
+                        tooltip += `\nAllotment left: ${entry.allotmentLeft}`;
+                    }
+                    
+                    box.title = tooltip;
                     ganttChart.appendChild(box);
                 }
             });
         }
 
+        // Render metrics
         function renderMetrics(processes, ganttData) {
-            
+            // Calculate metrics
             const totalWait = processes.reduce((sum, p) => sum + (p.completionTime - p.arrivalTime - p.burstTime), 0);
             const totalTAT = processes.reduce((sum, p) => sum + p.turnaroundTime, 0);
             const totalRT = processes.reduce((sum, p) => sum + p.responseTime, 0);
             const totalExecTime = ganttData.length > 0 ? ganttData[ganttData.length - 1].end : 0;
             
-            
+            // Update UI
             avgWait.textContent = (totalWait / processes.length).toFixed(2);
             avgTAT.textContent = (totalTAT / processes.length).toFixed(2);
             avgRT.textContent = (totalRT / processes.length).toFixed(2);
             totalExec.textContent = totalExecTime;
+            
+            // Update metrics table
+            metricsBody.innerHTML = '';
+            processes.forEach(p => {
+                const row = metricsBody.insertRow();
+                const waitingTime = p.completionTime - p.arrivalTime - p.burstTime;
+                row.innerHTML = `
+                    <td>P${p.id}</td>
+                    <td>${p.arrivalTime}</td>
+                    <td>${p.burstTime}</td>
+                    <td>${p.completionTime}</td>
+                    <td>${p.turnaroundTime}</td>
+                    <td>${waitingTime}</td>
+                    <td>${p.responseTime}</td>
+                `;
+            });
         }
 
-        
+        // Algorithm selection change
         algorithmSelect.addEventListener('change', function() {
             rrControls.style.display = this.value === 'rr' ? 'block' : 'none';
             mlfqControls.style.display = this.value === 'mlfq' ? 'block' : 'none';
         });
 
-        
+        // Input type change
         inputTypeSelect.addEventListener('change', function() {
             if (this.value === 'random') {
                 generateProcesses();
             }
         });
 
-        
+        // Simulation speed change
         simSpeed.addEventListener('input', function() {
             speedValue.textContent = `${this.value}x`;
         });
 
-        
+        // Generate processes button
         generateBtn.addEventListener('click', generateProcesses);
 
         function generateProcesses() {
@@ -789,12 +859,14 @@
             actionMessage.textContent = `Generated ${processCountInput.value || 5} random processes.`;
         }
 
+        // Clear processes button
         clearBtn.addEventListener('click', function() {
             processTable.innerHTML = '';
+            metricsBody.innerHTML = '';
             actionMessage.textContent = 'Cleared all processes.';
         });
 
-        
+        // Simulate button
         simulateBtn.addEventListener('click', function() {
             try {
                 const processes = getProcessesFromTable();
@@ -824,20 +896,21 @@
                         break;
                     case 'mlfq':
                         const quanta = Array.from(document.getElementsByClassName('mlfq-quantum')).map(q => parseInt(q.value));
+                        const allotments = Array.from(document.getElementsByClassName('mlfq-allotment')).map(a => parseInt(a.value));
                         const boostTime = parseInt(boostTimeInput.value);
                         if (isNaN(boostTime) || boostTime <= 0) {
                             throw new Error('Boost time must be a positive number');
                         }
-                        scheduler = new MLFQScheduler(processes, boostTime, quanta);
+                        scheduler = new MLFQScheduler(processes, boostTime, quanta, allotments);
                         break;
                 }
                 
                 result = scheduler.schedule();
-                renderGanttChart(result.ganttChart);
+                renderGanttChart.call(scheduler, result.ganttChart);
                 renderMetrics(result.processes, result.ganttChart);
                 actionMessage.textContent = 'Simulation completed successfully.';
                 
-                
+                // Update progress and status
                 progressPercent.textContent = '100';
                 progressBar.value = 100;
                 cpuStatus.textContent = 'Idle';
@@ -849,7 +922,7 @@
             }
         });
 
-        
+        // Reset button
         resetBtn.addEventListener('click', function() {
             ganttChart.innerHTML = '<p>No simulation data available. Run simulation to see results.</p>';
             avgWait.textContent = '--';
@@ -860,10 +933,11 @@
             nextQueue.textContent = '--';
             progressPercent.textContent = '0';
             progressBar.value = 0;
+            metricsBody.innerHTML = '';
             actionMessage.textContent = 'Reset completed. Ready for new simulation.';
         });
 
-        
+        // Initialize the page
         initializeTable();
     </script>
 </body>
