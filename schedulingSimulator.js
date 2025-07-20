@@ -34,8 +34,6 @@ class SchedulerVisualizer {
             n = parseInt(await this.question("Enter the number of processes: "));
             if (isNaN(n) || n <= 0) {
                 console.log("Please enter a positive number for the number of processes.");
-            } else if (n < 0) {
-                console.log("Negative numbers are invalid. Please enter a positive number and try again.");
             } else {
                 break;
             }
@@ -55,7 +53,7 @@ class SchedulerVisualizer {
         console.log("5. MLFQ");
         const choice = await this.question("Enter your choice (1-5): ");
 
-        switch(choice) {
+        switch (choice) {
             case '1':
                 await this.runScheduler(new FIFOScheduler(this.processes));
                 break;
@@ -136,18 +134,31 @@ class SchedulerVisualizer {
 
     async runScheduler(scheduler) {
         const result = scheduler.schedule();
-        console.log("\nGantt Chart:");
-        console.log(result.ganttChart.map(entry => 
-            `P${entry.process} [${entry.start}-${entry.end}]`).join(" -> "));
-        
+        const ganttChart = result.ganttChart;
+
+        console.log("\nGantt Chart (Animating):");
+        await this.renderGanttChart(ganttChart);
+        this.printMetrics(result.processes);
+    }
+
+    async renderGanttChart(ganttChart) {
+        for (const entry of ganttChart) {
+            console.log(`P${entry.process} [${entry.start}-${entry.end}]`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+
+    printMetrics(processes) {
         console.log("\nProcess Metrics:");
         console.log("PID\tArrival\tBurst\tFinish\tTAT\tResponse");
-        result.processes.forEach(p => {
+
+        processes.forEach(p => {
             console.log(`P${p.id}\t${p.arrivalTime}\t${p.burstTime}\t${p.completionTime}\t${p.turnaroundTime}\t${p.responseTime}`);
         });
-        
-        const avgTAT = result.processes.reduce((sum, p) => sum + p.turnaroundTime, 0) / result.processes.length;
-        const avgRT = result.processes.reduce((sum, p) => sum + p.responseTime, 0) / result.processes.length;
+
+        const avgTAT = processes.reduce((sum, p) => sum + p.turnaroundTime, 0) / processes.length;
+        const avgRT = processes.reduce((sum, p) => sum + p.responseTime, 0) / processes.length;
+
         console.log(`\nAverage Turnaround Time: ${avgTAT.toFixed(2)}`);
         console.log(`Average Response Time: ${avgRT.toFixed(2)}`);
     }
@@ -322,7 +333,6 @@ class RoundRobinScheduler {
         let arrived = [];
 
         while (completed.length < this.processes.length) {
-            
             this.processes.forEach(p => {
                 if (p.arrivalTime <= currentTime && !arrived.includes(p)) {
                     queue.push(p);
@@ -381,11 +391,12 @@ class RoundRobinScheduler {
 }
 
 class MLFQScheduler {
-    constructor(processes, boostTime = 20, quanta = [4, 8, Infinity], allotments = [8, 16, Infinity]) {
+    constructor(processes, boostTime = 20, quanta = [4, 8, 16, Infinity], allotments = [8, 16, 32, Infinity]) {
         this.queues = [
             { quantum: quanta[0], processes: [] },
             { quantum: quanta[1], processes: [] },
-            { quantum: quanta[2], processes: [] }
+            { quantum: quanta[2], processes: [] },
+            { quantum: quanta[3], processes: [] }
         ];
         this.allotments = allotments; 
         this.processes = processes.map(p => ({
@@ -420,7 +431,6 @@ class MLFQScheduler {
                 this.lastBoost = currentTime;
             }
 
-            
             this.processes.forEach(p => {
                 if (p.arrivalTime <= currentTime && !arrived.includes(p) && p.remainingTime > 0) {
                     this.queues[0].processes.push(p);
@@ -440,7 +450,6 @@ class MLFQScheduler {
                 process.responseTime = currentTime - process.arrivalTime;
             }
 
-            
             let allotLeft = this.allotments[queueIdx] - process.timeInQueue;
             let execTime = Math.min(queue.quantum, process.remainingTime, allotLeft);
 
@@ -464,7 +473,6 @@ class MLFQScheduler {
             process.timeInQueue += execTime;
             currentTime += execTime;
 
-            
             this.processes.forEach(p => {
                 if (
                     p.arrivalTime > (currentTime - execTime) &&
@@ -482,13 +490,11 @@ class MLFQScheduler {
                 process.turnaroundTime = process.completionTime - process.arrivalTime;
                 this.completed.push(process);
             } else {
-                
                 if (process.timeInQueue >= this.allotments[queueIdx] && queueIdx < this.queues.length - 1) {
                     process.queueLevel = queueIdx + 1;
                     process.timeInQueue = 0; 
                     this.queues[queueIdx + 1].processes.push(process);
                 } else {
-                    
                     this.queues[queueIdx].processes.push(process);
                 }
             }
