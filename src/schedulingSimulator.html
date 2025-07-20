@@ -3,177 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPU Scheduling Visualizer</title>
+    <title>Ferrari CPU Scheduling Visualizer</title>
     <style>
         :root {
-            --mercedes-teal: #00D2BE;
-            --mercedes-black: #000000;
-            --mercedes-silver: #6C6C6C;
-            --mercedes-accent: #FFD700;
-            --mercedes-red: #FF0000;
-            --mercedes-dark: #1E1E1E;
+            --ferrari-red: #ED1C24;
+            --ferrari-yellow: #FFD700;
+            --ferrari-black: #000000;
+            --ferrari-dark: #1E1E1E;
+            --ferrari-gray: #333333;
+            --ferrari-light: #F5F5F5;
+            --ferrari-silver: #C0C0C0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
         }
         
         body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
+            background-color: var(--ferrari-dark);
+            color: var(--ferrari-light);
+            line-height: 1.6;
             padding: 20px;
-            background-color: var(--mercedes-dark);
-            color: white;
-            background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(30, 30, 30, 0.9));
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--ferrari-gray);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border: 1px solid var(--ferrari-red);
         }
         
         .header {
             text-align: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--mercedes-teal);
-            background-color: var(--mercedes-black);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border-bottom: 2px solid var(--ferrari-yellow);
+            background: linear-gradient(to right, 
+                rgba(237, 28, 36, 0.1), 
+                rgba(237, 28, 36, 0.3), 
+                rgba(237, 28, 36, 0.1));
         }
         
         .header h1 {
-            color: var(--mercedes-teal);
-            margin: 0;
-            font-size: 2.2em;
-            text-transform: uppercase;
+            color: var(--ferrari-red);
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
             letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(0, 210, 190, 0.5);
         }
         
         .developer {
-            color: var(--mercedes-silver);
+            color: var(--ferrari-yellow);
             font-style: italic;
-            text-align: center;
-            margin-top: 5px;
-            font-size: 0.9em;
-        }
-        
-        .container {
-            display: flex;
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .control-panel, .visualization {
-            background-color: var(--mercedes-black);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--mercedes-teal);
+            font-size: 0.9rem;
         }
         
         .control-panel {
-            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
         }
         
-        .visualization {
-            flex: 2;
+        .panel {
+            background-color: var(--ferrari-black);
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid var(--ferrari-red);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
         
-        h2, h3 {
-            color: var(--mercedes-teal);
-            border-bottom: 1px solid var(--mercedes-teal);
-            padding-bottom: 8px;
-            margin-top: 0;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        h2 {
+            color: var(--ferrari-yellow);
             margin-bottom: 15px;
-            background-color: rgba(30, 30, 30, 0.7);
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--ferrari-red);
+            padding-bottom: 5px;
         }
         
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid var(--mercedes-teal);
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
         }
         
-        th {
-            background-color: var(--mercedes-black);
-            color: var(--mercedes-teal);
-            font-weight: bold;
+        .input-group label {
+            min-width: 120px;
+            color: var(--ferrari-yellow);
+            font-weight: 500;
         }
         
-        tr:hover {
-            background-color: rgba(0, 210, 190, 0.1);
-        }
-        
-        input {
-            width: 60px;
-            padding: 5px;
-            border: 1px solid var(--mercedes-teal);
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid var(--ferrari-red);
             border-radius: 4px;
-            background-color: var(--mercedes-dark);
-            color: white;
+            background-color: var(--ferrari-dark);
+            color: var(--ferrari-light);
+            font-size: 0.9rem;
         }
         
-        select {
-            padding: 5px;
-            border: 1px solid var(--mercedes-teal);
-            border-radius: 4px;
-            background-color: var(--mercedes-dark);
-            color: white;
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--ferrari-yellow);
+            box-shadow: 0 0 5px var(--ferrari-yellow);
         }
         
         button {
-            background-color: var(--mercedes-teal);
-            color: var(--mercedes-black);
+            background-color: var(--ferrari-red);
+            color: var(--ferrari-light);
             border: none;
-            padding: 8px 12px;
+            padding: 8px 15px;
             border-radius: 4px;
             cursor: pointer;
-            margin-right: 5px;
-            margin-bottom: 5px;
             font-weight: bold;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            margin-right: 5px;
+            margin-bottom: 5px;
         }
         
         button:hover {
-            background-color: var(--mercedes-accent);
+            background-color: var(--ferrari-yellow);
+            color: var(--ferrari-black);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
         }
         
         .btn-group {
-            margin: 10px 0;
+            margin: 15px 0;
             display: flex;
             flex-wrap: wrap;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: var(--ferrari-dark);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--ferrari-red);
+        }
+        
+        th {
+            background-color: var(--ferrari-red);
+            color: var(--ferrari-black);
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: rgba(237, 28, 36, 0.1);
+        }
+        
+        tr:hover {
+            background-color: rgba(237, 28, 36, 0.2);
+        }
+        
+        .visualization {
+            background-color: var(--ferrari-black);
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border-left: 4px solid var(--ferrari-red);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
         
         .gantt-chart {
             display: flex;
             flex-wrap: wrap;
-            gap: 2px;
-            background-color: var(--mercedes-dark);
+            gap: 5px;
+            margin: 15px 0;
             padding: 15px;
+            background-color: var(--ferrari-dark);
             border-radius: 4px;
-            margin-top: 20px;
+            border: 1px solid var(--ferrari-red);
             min-height: 60px;
-            border: 1px solid var(--mercedes-teal);
+            align-items: center;
         }
         
         .gantt-box {
             padding: 8px;
-            border-radius: 4px;
-            background-color: var(--mercedes-teal);
+            border-radius: 3px;
+            color: var(--ferrari-black);
             text-align: center;
             min-width: 40px;
-            position: relative;
-            color: var(--mercedes-black);
             font-weight: bold;
+            position: relative;
             transition: all 0.2s ease;
         }
         
         .gantt-box:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(0, 210, 190, 0.7);
+            transform: scale(1.1);
+            z-index: 10;
         }
         
         .gantt-box:hover::after {
@@ -182,793 +212,1082 @@
             bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--mercedes-black);
-            color: var(--mercedes-teal);
-            padding: 8px;
+            background: var(--ferrari-black);
+            color: var(--ferrari-yellow);
+            padding: 5px 10px;
             border-radius: 4px;
             white-space: nowrap;
             z-index: 100;
-            border: 1px solid var(--mercedes-teal);
+            border: 1px solid var(--ferrari-yellow);
             font-weight: normal;
         }
         
         .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric-item {
+            background-color: var(--ferrari-dark);
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid var(--ferrari-red);
+        }
+        
+        .metric-item p {
+            color: var(--ferrari-yellow);
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .metric-item span {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--ferrari-light);
+        }
+        
+        .status-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
             margin-top: 20px;
-            background-color: rgba(30, 30, 30, 0.7);
+        }
+        
+        .status-box {
+            background-color: var(--ferrari-dark);
             padding: 15px;
             border-radius: 4px;
-            border: 1px solid var(--mercedes-teal);
-        }
-        
-        .metrics p {
-            margin: 5px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .metrics p span {
-            font-weight: bold;
-            color: var(--mercedes-teal);
-        }
-        
-        .status {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: rgba(0, 210, 190, 0.1);
-            border-radius: 4px;
-            border-left: 4px solid var(--mercedes-teal);
-        }
-        
-        .algorithm-controls {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: rgba(30, 30, 30, 0.7);
-            border-radius: 4px;
-            border: 1px solid var(--mercedes-teal);
-        }
-        
-        .speed-control {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-        
-        .speed-control input {
-            width: 100px;
-            margin: 0 10px;
+            border-left: 3px solid var(--ferrari-red);
         }
         
         .progress-container {
             margin-top: 10px;
-            background-color: rgba(30, 30, 30, 0.7);
-            padding: 15px;
-            border-radius: 4px;
-            border: 1px solid var(--mercedes-teal);
         }
         
         progress {
             width: 100%;
             height: 10px;
             border-radius: 5px;
-            background-color: var(--mercedes-dark);
+            border: 1px solid var(--ferrari-red);
         }
         
         progress::-webkit-progress-bar {
-            background-color: var(--mercedes-dark);
+            background-color: var(--ferrari-dark);
             border-radius: 5px;
         }
         
         progress::-webkit-progress-value {
-            background-color: var(--mercedes-teal);
+            background-color: var(--ferrari-red);
             border-radius: 5px;
+            transition: width 0.5s ease;
         }
         
-        progress::-moz-progress-bar {
-            background-color: var(--mercedes-teal);
-            border-radius: 5px;
+        .action-message {
+            background-color: var(--ferrari-dark);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            border-left: 3px solid var(--ferrari-red);
+            font-style: italic;
+            color: var(--ferrari-yellow);
         }
         
-        .error {
-            color: var(--mercedes-red);
-            font-size: 0.9em;
-            margin-top: 5px;
+        .mlfq-controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
         }
         
-        .process-input {
+        .mlfq-control-group {
+            background-color: var(--ferrari-dark);
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--ferrari-red);
+        }
+        
+        .mlfq-control-group h4 {
+            color: var(--ferrari-yellow);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .mlfq-input-group {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         
-        .process-input label {
-            margin-right: 10px;
-            min-width: 100px;
-            color: var(--mercedes-teal);
+        .mlfq-input-group label {
+            min-width: 30px;
+            color: var(--ferrari-yellow);
         }
-        
-        #process-count {
-            width: 60px;
+
+        .queue-legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
-        
-        .metrics-table {
-            margin-top: 20px;
-            width: 100%;
-            background-color: rgba(30, 30, 30, 0.7);
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
-        
-        .metrics-table th {
-            background-color: var(--mercedes-black);
-            color: var(--mercedes-teal);
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
         }
-        
-        /* F1-inspired accents */
-        .f1-accent {
-            position: relative;
-        }
-        
-        .f1-accent::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--mercedes-teal), var(--mercedes-accent));
-        }
-        
-        /* Responsive design */
+
         @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
+            .control-panel {
+                grid-template-columns: 1fr;
             }
             
-            .control-panel, .visualization {
-                flex: auto;
+            .status-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .mlfq-controls-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header f1-accent">
-        <h1>CPU Scheduling Visualizer</h1>
-        <p class="developer">Developed by: VIOLDAN E. BAYOCOT</p>
-    </div>
-
     <div class="container">
+        <div class="header">
+            <h1>CPU SCHEDULING VISUALIZER</h1>
+        </div>
+
         <div class="control-panel">
-            <h2>Process Control</h2>
-            
-            <div class="process-input">
-                <label for="input-type">Input Type:</label>
-                <select id="input-type">
-                    <option value="manual">Manual Input</option>
-                    <option value="random">Random Processes</option>
-                </select>
-            </div>
-            
-            <div class="process-input">
-                <label for="process-count">Number of Processes:</label>
-                <input type="number" id="process-count" min="1" value="5">
-            </div>
-
-            <div class="btn-group">
-                <button id="generate-processes">Generate Processes</button>
-                <button id="clear-processes">Clear All</button>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Process</th>
-                        <th>Arrival Time</th>
-                        <th>Exec. Time</th>
-                        <th>Priority</th>
-                    </tr>
-                </thead>
-                <tbody id="process-table">
-                    <!-- Processes will be added here -->
-                </tbody>
-            </table>
-
-            <div class="algorithm-controls">
-                <h3>Scheduling Algorithm</h3>
-                <select id="algorithm">
-                    <option value="fifo">First-Come First-Served (FIFO)</option>
-                    <option value="sjf">Shortest Job First (SJF)</option>
-                    <option value="srtf">Shortest Remaining Time First (SRTF)</option>
-                    <option value="rr">Round Robin</option>
-                    <option value="mlfq">Multilevel Feedback Queue (MLFQ)</option>
-                </select>
-
-                <div id="rr-controls" style="display: none; margin-top: 10px;">
-                    <label for="quantum">Time Quantum:</label>
-                    <input type="number" id="quantum" min="1" value="4">
+            <div class="panel process-controls">
+                <h2>PROCESS CONTROL</h2>
+                
+                <div class="input-group">
+                    <label for="process-count">Process Count:</label>
+                    <input type="number" id="process-count" min="1" value="5">
                 </div>
-
-                <div id="mlfq-controls" style="display: none; margin-top: 10px;">
-                    <label>MLFQ Time Slices:</label>
-                    <div>
-                        Q0: <input type="number" class="mlfq-quantum" min="1" value="4">
-                        Q1: <input type="number" class="mlfq-quantum" min="1" value="8">
-                        Q2: <input type="number" class="mlfq-quantum" min="1" value="16">
-                    </div>
-                    <label>MLFQ Allotments:</label>
-                    <div>
-                        Q0: <input type="number" class="mlfq-allotment" min="1" value="8">
-                        Q1: <input type="number" class="mlfq-allotment" min="1" value="16">
-                        Q2: <input type="number" class="mlfq-allotment" min="1" value="9999">
-                    </div>
-                    <label for="boost-time">Boost Time:</label>
-                    <input type="number" id="boost-time" min="1" value="20">
+                
+                <div class="input-group">
+                    <label for="input-type">Input Type:</label>
+                    <select id="input-type">
+                        <option value="manual">Manual Input</option>
+                        <option value="random">Random</option>
+                    </select>
                 </div>
+                
+                <div class="btn-group">
+                    <button id="generate-processes">Generate Processes</button>
+                    <button id="clear-processes">Clear All</button>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Process</th>
+                            <th>Arrival Time</th>
+                            <th>Exec. Time</th>
+                            <th>Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody id="process-table">
+                        <!-- Processes will be added here -->
+                    </tbody>
+                </table>
             </div>
 
-            <div class="status">
-                <p>Action Message: <span id="action-message">No Errors.</span></p>
+            <div class="panel algorithm-controls">
+                <h2>SCHEDULING ALGORITHM</h2>
+                
+                <div class="input-group">
+                    <label for="algorithm">Algorithm:</label>
+                    <select id="algorithm">
+                        <option value="fifo">FIFO</option>
+                        <option value="sjf">SJF</option>
+                        <option value="srtf">SRTF</option>
+                        <option value="rr">Round Robin</option>
+                        <option value="mlfq">MLFQ</option>
+                    </select>
+                </div>
+                
+                <div id="rr-controls" style="display: none;">
+                    <div class="input-group">
+                        <label for="quantum">Time Quantum:</label>
+                        <input type="number" id="quantum" min="1" value="4">
+                    </div>
+                </div>
+                
+                <div id="mlfq-controls" style="display: none;">
+                    <div class="input-group">
+                        <label for="boost-time">Boost Time:</label>
+                        <input type="number" id="boost-time" min="1" value="20">
+                    </div>
+                    
+                    <div class="mlfq-controls-grid">
+                        <div class="mlfq-control-group">
+                            <h4>Time Quantum</h4>
+                            <div class="mlfq-input-group">
+                                <label>Q0:</label>
+                                <input type="number" class="mlfq-quantum" min="1" value="4">
+                            </div>
+                            <div class="mlfq-input-group">
+                                <label>Q1:</label>
+                                <input type="number" class="mlfq-quantum" min="1" value="8">
+                            </div>
+                            <div class="mlfq-input-group">
+                                <label>Q2:</label>
+                                <input type="number" class="mlfq-quantum" min="1" value="16">
+                            </div>
+                            <div class="mlfq-input-group">
+                                <label>Q3:</label>
+                                <input type="number" class="mlfq-quantum" min="1" value="32">
+                            </div>
+                        </div>
+                        
+                        <div class="mlfq-control-group">
+                            <h4>Time Allotment</h4>
+                            <div class="mlfq-input-group">
+                                <label>Q0:</label>
+                                <input type="number" class="mlfq-allotment" min="1" value="8">
+                            </div>
+                            <div class="mlfq-input-group">
+                                <label>Q1:</label>
+                                <input type="number" class="mlfq-allotment" min="1" value="16">
+                            </div>
+                            <div class="mlfq-input-group">
+                                <label>Q2:</label>
+                                <input type="number" class="mlfq-allotment" min="1" value="32">
+                            </div>
+                            <div class="mlfq-input-group">
+                                <label>Q3:</label>
+                                <input type="number" class="mlfq-allotment" min="1" value="64">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="visualization">
-            <h2>Simulation Results</h2>
+            <h2>SIMULATION RESULTS</h2>
             
-            <h3>Gantt Chart (Each box represents a second)</h3>
+            <div class="action-message" id="action-message">
+                No Errors.
+            </div>
+            
+            <h3>GANTT CHART (Each box represents a time unit)</h3>
+            <div id="queue-legend" class="queue-legend" style="display: none;">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #FF0000;"></div>
+                    <span>Q0 (Highest Priority)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #FFA500;"></div>
+                    <span>Q1</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #FFFF00;"></div>
+                    <span>Q2</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #00FF00;"></div>
+                    <span>Q3 (Lowest Priority)</span>
+                </div>
+            </div>
             <div class="gantt-chart" id="gantt-chart">
-                <p>No simulation data available. Run simulation to see results.</p>
+                No simulation data available. Run simulation to see results.
             </div>
-
+            
+            <h3>PROCESS METRICS</h3>
+            <table id="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Process ID</th>
+                        <th>Arrival Time</th>
+                        <th>Burst Time</th>
+                        <th>Completion Time</th>
+                        <th>Turnaround Time</th>
+                        <th>Response Time</th>
+                    </tr>
+                </thead>
+                <tbody id="metrics-body">
+                    <!-- Metrics will be added here -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4"><strong>Average</strong></td>
+                        <td id="avg-tat-cell">--</td>
+                        <td id="avg-resp-cell">--</td>
+                    </tr>
+                </tfoot>
+            </table>
+            
             <div class="metrics">
-                <h3>Performance Metrics</h3>
-                <p>Average Waiting Time: <span id="avg-wait">--</span></p>
-                <p>Average Turnaround Time: <span id="avg-tat">--</span></p>
-                <p>Average Response Time: <span id="avg-rt">--</span></p>
-                <p>Total Execution Time: <span id="total-exec">--</span></p>
+                <div class="metric-item">
+                    <p>Average Waiting Time</p>
+                    <span id="avg-wait">--</span>
+                </div>
+                <div class="metric-item">
+                    <p>Average Turnaround Time</p>
+                    <span id="avg-tat">--</span>
+                </div>
+                <div class="metric-item">
+                    <p>Total Execution Time</p>
+                    <span id="total-exec">--</span>
+                </div>
             </div>
-
-            <div class="speed-control">
-                <label>Simulation Speed:</label>
-                <input type="range" id="sim-speed" min="0.1" max="2" step="0.1" value="1">
-                <span id="speed-value">1.0x</span>
+            
+            <div class="status-panel">
+                <div class="status-box">
+                    <p>CPU: <span id="cpu-status">--</span></p>
+                    <p>Next Queue: <span id="next-queue">--</span></p>
+                </div>
+                <div class="status-box">
+                    <p>Overall Progress</p>
+                    <div class="progress-container">
+                        <progress id="progress-bar" value="0" max="100"></progress>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                </div>
             </div>
-
-            <div class="progress-container">
-                <p>CPU: <span id="cpu-status">--</span></p>
-                <p>Next Queue: <span id="next-queue">--</span></p>
-                <p>Overall Progress: <span id="progress-percent">0</span>%</p>
-                <progress id="progress-bar" value="0" max="100"></progress>
-            </div>
-
+            
             <div class="btn-group">
-                <button id="simulate">Simulate</button>
-                <button id="reset">Reset All</button>
-            </div>
-
-            <!-- Metrics Table Added Here -->
-            <div class="metrics-table-container">
-                <h3>Detailed Process Metrics</h3>
-                <table class="metrics-table" id="metrics-table">
-                    <thead>
-                        <tr>
-                            <th>Process</th>
-                            <th>Arrival Time</th>
-                            <th>Burst Time</th>
-                            <th>Completion Time</th>
-                            <th>Turnaround Time</th>
-                            <th>Waiting Time</th>
-                            <th>Response Time</th>
-                        </tr>
-                    </thead>
-                    <tbody id="metrics-body">
-                        <!-- Metrics data will be inserted here -->
-                    </tbody>
-                </table>
+                <button id="simulate">▶ Simulate</button>
+                <button id="reset">↻ Reset All</button>
             </div>
         </div>
     </div>
 
     <script>
-        const readline = require('readline');
-
-class Process {
-    constructor(id, arrivalTime, burstTime) {
-        this.id = id;
-        this.arrivalTime = arrivalTime;
-        this.burstTime = burstTime;
-        this.remainingTime = burstTime;
-        this.completionTime = 0;
-        this.turnaroundTime = 0;
-        this.responseTime = -1;
-        this.priorityLevel = 0;
-        this.timeInQueue = 0;
-    }
-}
-
-class SchedulerVisualizer {
-    constructor() {
-        this.rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout
-        });
-        this.processes = [];
-    }
-
-    async main() {
-        console.log("Scheduling Visualizer\n");
-        console.log("A. Manual Input");
-        console.log("B. Random Process");
-        const inputType = await this.question("Enter your letter of choice (A OR B): ");
-
-        let n;
-        while (true) {
-            n = parseInt(await this.question("Enter the number of processes: "));
-            if (isNaN(n) || n <= 0) {
-                console.log("Please enter a positive number for the number of processes.");
-            } else if (n < 0) {
-                console.log("Negative numbers are invalid. Please enter a positive number and try again.");
-            } else {
-                break;
-            }
-        }
-
-        if (inputType.toUpperCase() === 'A') {
-            await this.manualInput(n);
-        } else {
-            await this.randomInput(n);
-        }
-
-        console.log("\nChoose a Scheduling Algorithm:");
-        console.log("1. FIFO");
-        console.log("2. SJF");
-        console.log("3. SRTF");
-        console.log("4. Round Robin");
-        console.log("5. MLFQ");
-        const choice = await this.question("Enter your choice (1-5): ");
-
-        switch(choice) {
-            case '1':
-                await this.runScheduler(new FIFOScheduler(this.processes));
-                break;
-            case '2':
-                await this.runScheduler(new SJFScheduler(this.processes));
-                break;
-            case '3':
-                await this.runScheduler(new SRTFScheduler(this.processes));
-                break;
-            case '4':
-                let timeSlice;
-                while (true) {
-                    timeSlice = parseInt(await this.question("Enter time slice: "));
-                    if (isNaN(timeSlice) || timeSlice <= 0) {
-                        console.log("Time slice must be a positive number.");
-                    } else {
-                        break;
-                    }
-                }
-                await this.runScheduler(new RoundRobinScheduler(this.processes, timeSlice));
-                break;
-            case '5':
-                let boostTime;
-                while (true) {
-                    boostTime = parseInt(await this.question("Enter boost time (e.g. 20): "));
-                    if (isNaN(boostTime) || boostTime <= 0) {
-                        console.log("Boost time must be a positive number.");
-                    } else {
-                        break;
-                    }
-                }
-                await this.runScheduler(new MLFQScheduler(this.processes, boostTime));
-                break;
-            default:
-                console.log("Invalid choice. Please try again!");
-        }
-
-        this.rl.close();
-    }
-
-    async question(prompt) {
-        return new Promise(resolve => this.rl.question(prompt, resolve));
-    }
-
-    async manualInput(n) {
-        this.processes = [];
-        for (let i = 0; i < n; i++) {
-            let arrival, burst;
-            while (true) {
-                arrival = parseInt(await this.question(`Enter arrival time for P${i}: `));
-                if (isNaN(arrival) || arrival < 0) {
-                    console.log("Arrival time must be a non-negative number.");
-                } else {
-                    break;
-                }
-            }
-            while (true) {
-                burst = parseInt(await this.question(`Enter burst time for P${i}: `));
-                if (isNaN(burst) || burst <= 0) {
-                    console.log("Burst time must be a positive number.");
-                } else {
-                    break;
-                }
-            }
-            this.processes.push(new Process(i, arrival, burst));
-        }
-    }
-
-    async randomInput(n) {
-        this.processes = [];
-        for (let i = 0; i < n; i++) {
-            const arrival = Math.floor(Math.random() * 10);
-            const burst = Math.floor(Math.random() * 10) + 1;
-            console.log(`P${i} - Arrival: ${arrival}, Burst: ${burst}`);
-            this.processes.push(new Process(i, arrival, burst));
-        }
-    }
-
-    async runScheduler(scheduler) {
-        const result = scheduler.schedule();
-        console.log("\nGantt Chart:");
-        console.log(result.ganttChart.map(entry => 
-            `P${entry.process} [${entry.start}-${entry.end}]`).join(" -> "));
-        
-        console.log("\nProcess Metrics:");
-        console.log("PID\tArrival\tBurst\tFinish\tTAT\tResponse");
-        result.processes.forEach(p => {
-            console.log(`P${p.id}\t${p.arrivalTime}\t${p.burstTime}\t${p.completionTime}\t${p.turnaroundTime}\t${p.responseTime}`);
-        });
-        
-        const avgTAT = result.processes.reduce((sum, p) => sum + p.turnaroundTime, 0) / result.processes.length;
-        const avgRT = result.processes.reduce((sum, p) => sum + p.responseTime, 0) / result.processes.length;
-        console.log(`\nAverage Turnaround Time: ${avgTAT.toFixed(2)}`);
-        console.log(`Average Response Time: ${avgRT.toFixed(2)}`);
-    }
-}
-
-class FIFOScheduler {
-    constructor(processes) {
-        this.processes = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
-    }
-    
-    schedule() {
-        let currentTime = 0;
-        const ganttChart = [];
-        
-        for (const process of this.processes) {
-            if (currentTime < process.arrivalTime) {
-                currentTime = process.arrivalTime;
-            }
-            
-            if (process.responseTime === -1) {
-                process.responseTime = currentTime - process.arrivalTime;
-            }
-            
-            ganttChart.push({
-                process: process.id,
-                start: currentTime,
-                end: currentTime + process.burstTime
-            });
-            
-            currentTime += process.burstTime;
-            process.completionTime = currentTime;
-            process.turnaroundTime = process.completionTime - process.arrivalTime;
-        }
-        
-        return { ganttChart, processes: this.processes };
-    }
-}
-
-class SJFScheduler {
-    constructor(processes) {
-        this.processes = processes.map(p => ({
-            ...p,
-            remainingTime: p.burstTime,
-            responseTime: -1,
-            completionTime: 0,
-            turnaroundTime: 0
-        }));
-    }
-    
-    schedule() {
-        let currentTime = 0;
-        const ganttChart = [];
-        const completed = [];
-        const readyQueue = [];
-        
-        while (completed.length < this.processes.length) {
-            this.processes.forEach(p => {
-                if (p.arrivalTime <= currentTime && !completed.includes(p) && !readyQueue.includes(p)) {
-                    readyQueue.push(p);
-                }
-            });
-            
-            if (readyQueue.length === 0) {
-                currentTime++;
-                continue;
-            }
-            
-            readyQueue.sort((a, b) => a.burstTime - b.burstTime);
-            const process = readyQueue.shift();
-            
-            if (process.responseTime === -1) {
-                process.responseTime = currentTime - process.arrivalTime;
-            }
-            
-            ganttChart.push({
-                process: process.id,
-                start: currentTime,
-                end: currentTime + process.burstTime
-            });
-            
-            currentTime += process.burstTime;
-            process.completionTime = currentTime;
-            process.turnaroundTime = process.completionTime - process.arrivalTime;
-            completed.push(process);
-        }
-        
-        return { ganttChart, processes: this.processes };
-    }
-}
-
-class SRTFScheduler {
-    constructor(processes) {
-        this.processes = processes.map(p => ({
-            ...p,
-            remainingTime: p.burstTime,
-            responseTime: -1,
-            completionTime: 0,
-            turnaroundTime: 0
-        }));
-    }
-
-    schedule() {
-        let currentTime = 0;
-        const ganttChart = [];
-        const completed = [];
-        let lastProcessId = null;
-
-        while (completed.length < this.processes.length) {
-            const readyQueue = this.processes.filter(p =>
-                p.arrivalTime <= currentTime &&
-                p.remainingTime > 0 &&
-                !completed.includes(p)
-            );
-
-            if (readyQueue.length === 0) {
-                currentTime++;
-                continue;
-            }
-
-            readyQueue.sort((a, b) => a.remainingTime - b.remainingTime);
-            const process = readyQueue[0];
-
-            if (process.responseTime === -1) {
-                process.responseTime = currentTime - process.arrivalTime;
-            }
-
-            if (
-                ganttChart.length > 0 &&
-                ganttChart[ganttChart.length - 1].process === process.id
-            ) {
-                ganttChart[ganttChart.length - 1].end = currentTime + 1;
-            } else {
-                ganttChart.push({
-                    process: process.id,
-                    start: currentTime,
-                    end: currentTime + 1
-                });
-            }
-
-            process.remainingTime--;
-            currentTime++;
-            lastProcessId = process.id;
-
-            if (process.remainingTime === 0) {
-                process.completionTime = currentTime;
-                process.turnaroundTime = process.completionTime - process.arrivalTime;
-                completed.push(process);
-            }
-        }
-
-        return { ganttChart, processes: this.processes };
-    }
-}
-
-class RoundRobinScheduler {
-    constructor(processes, timeSlice) {
-        this.processes = processes.map(p => ({
-            ...p,
-            remainingTime: p.burstTime,
-            responseTime: -1,
-            completionTime: 0,
-            turnaroundTime: 0
-        }));
-        this.timeSlice = timeSlice;
-    }
-
-    schedule() {
-        let currentTime = 0;
-        const ganttChart = [];
-        const queue = [];
-        const completed = [];
-        let arrived = [];
-
-        while (completed.length < this.processes.length) {
-            
-            this.processes.forEach(p => {
-                if (p.arrivalTime <= currentTime && !arrived.includes(p)) {
-                    queue.push(p);
-                    arrived.push(p);
-                }
-            });
-
-            if (queue.length === 0) {
-                currentTime++;
-                continue;
-            }
-
-            const process = queue.shift();
-
-            if (process.responseTime === -1) {
-                process.responseTime = currentTime - process.arrivalTime;
-            }
-
-            const execTime = Math.min(this.timeSlice, process.remainingTime);
-
-            if (
-                ganttChart.length > 0 &&
-                ganttChart[ganttChart.length - 1].process === process.id &&
-                ganttChart[ganttChart.length - 1].end === currentTime
-            ) {
-                ganttChart[ganttChart.length - 1].end = currentTime + execTime;
-            } else {
-                ganttChart.push({
-                    process: process.id,
-                    start: currentTime,
-                    end: currentTime + execTime
-                });
-            }
-
-            process.remainingTime -= execTime;
-            currentTime += execTime;
-
-            this.processes.forEach(p => {
-                if (p.arrivalTime > (currentTime - execTime) && p.arrivalTime <= currentTime && !arrived.includes(p)) {
-                    queue.push(p);
-                    arrived.push(p);
-                }
-            });
-
-            if (process.remainingTime === 0) {
-                process.completionTime = currentTime;
-                process.turnaroundTime = process.completionTime - process.arrivalTime;
-                completed.push(process);
-            } else {
-                queue.push(process);
-            }
-        }
-
-        return { ganttChart, processes: this.processes };
-    }
-}
-
-class MLFQScheduler {
-    constructor(processes, boostTime = 20, quanta = [4, 8, Infinity], allotments = [8, 16, Infinity]) {
-        this.queues = [
-            { quantum: quanta[0], processes: [] },
-            { quantum: quanta[1], processes: [] },
-            { quantum: quanta[2], processes: [] }
+        // Process colors for Gantt chart
+        const processColors = [
+            '#ED1C24', // Ferrari Red
+            '#FFD700', // Ferrari Yellow
+            '#00A651', // Green
+            '#2E3192', // Blue
+            '#92278F', // Purple
+            '#F7931E', // Orange
+            '#00AEEF', // Light Blue
+            '#EC008C', // Pink
+            '#8DC63F', // Lime
+            '#6E2585'  // Violet
         ];
-        this.allotments = allotments; 
-        this.processes = processes.map(p => ({
-            ...p,
-            remainingTime: p.burstTime,
-            queueLevel: 0,
-            responseTime: -1,
-            completionTime: 0,
-            turnaroundTime: 0,
-            timeInQueue: 0 
-        }));
-        this.completed = [];
-        this.boostTime = boostTime;
-        this.lastBoost = 0;
-    }
 
-    schedule() {
-        let currentTime = 0;
-        const ganttChart = [];
-        let arrived = [];
+        // Queue colors for MLFQ
+        const queueColors = [
+            '#FF0000', // Red for Q0
+            '#FFA500', // Orange for Q1
+            '#FFFF00', // Yellow for Q2
+            '#00FF00'  // Green for Q3
+        ];
 
-        while (this.completed.length < this.processes.length) {
-            if (currentTime - this.lastBoost >= this.boostTime && currentTime !== 0) {
-                for (let i = 1; i < this.queues.length; i++) {
-                    while (this.queues[i].processes.length > 0) {
-                        const proc = this.queues[i].processes.shift();
-                        proc.queueLevel = 0;
-                        proc.timeInQueue = 0; 
-                        this.queues[0].processes.push(proc);
-                    }
-                }
-                this.lastBoost = currentTime;
-            }
-
-            
-            this.processes.forEach(p => {
-                if (p.arrivalTime <= currentTime && !arrived.includes(p) && p.remainingTime > 0) {
-                    this.queues[0].processes.push(p);
-                    arrived.push(p);
-                }
-            });
-
-            let queueIdx = this.queues.findIndex(q => q.processes.length > 0);
-            if (queueIdx === -1) {
-                currentTime++;
-                continue;
-            }
-            let queue = this.queues[queueIdx];
-            let process = queue.processes.shift();
-
-            if (process.responseTime === -1) {
-                process.responseTime = currentTime - process.arrivalTime;
-            }
-
-            
-            let allotLeft = this.allotments[queueIdx] - process.timeInQueue;
-            let execTime = Math.min(queue.quantum, process.remainingTime, allotLeft);
-
-            if (
-                ganttChart.length > 0 &&
-                ganttChart[ganttChart.length - 1].process === process.id &&
-                ganttChart[ganttChart.length - 1].end === currentTime &&
-                ganttChart[ganttChart.length - 1].queue === queueIdx
-            ) {
-                ganttChart[ganttChart.length - 1].end = currentTime + execTime;
-            } else {
-                ganttChart.push({
-                    process: process.id,
-                    start: currentTime,
-                    end: currentTime + execTime,
-                    queue: queueIdx
-                });
-            }
-
-            process.remainingTime -= execTime;
-            process.timeInQueue += execTime;
-            currentTime += execTime;
-
-            
-            this.processes.forEach(p => {
-                if (
-                    p.arrivalTime > (currentTime - execTime) &&
-                    p.arrivalTime <= currentTime &&
-                    !arrived.includes(p) &&
-                    p.remainingTime > 0
-                ) {
-                    this.queues[0].processes.push(p);
-                    arrived.push(p);
-                }
-            });
-
-            if (process.remainingTime === 0) {
-                process.completionTime = currentTime;
-                process.turnaroundTime = process.completionTime - process.arrivalTime;
-                this.completed.push(process);
-            } else {
-                
-                if (process.timeInQueue >= this.allotments[queueIdx] && queueIdx < this.queues.length - 1) {
-                    process.queueLevel = queueIdx + 1;
-                    process.timeInQueue = 0; 
-                    this.queues[queueIdx + 1].processes.push(process);
-                } else {
-                    
-                    this.queues[queueIdx].processes.push(process);
-                }
+        class Process {
+            constructor(id, arrivalTime, burstTime) {
+                this.id = id;
+                this.arrivalTime = arrivalTime;
+                this.burstTime = burstTime;
+                this.remainingTime = burstTime;
+                this.completionTime = 0;
+                this.turnaroundTime = 0;
+                this.responseTime = -1;
+                this.priorityLevel = 0;
+                this.timeInQueue = 0;
+                this.color = processColors[id % processColors.length];
             }
         }
 
-        return { ganttChart, processes: this.processes };
-    }
-}
+        class FIFOScheduler {
+            constructor(processes) {
+                this.processes = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
+            }
+            
+            schedule() {
+                let currentTime = 0;
+                const ganttChart = [];
+                
+                for (const process of this.processes) {
+                    if (currentTime < process.arrivalTime) {
+                        currentTime = process.arrivalTime;
+                    }
+                    
+                    if (process.responseTime === -1) {
+                        process.responseTime = currentTime - process.arrivalTime;
+                    }
+                    
+                    ganttChart.push({
+                        process: process.id,
+                        start: currentTime,
+                        end: currentTime + process.burstTime,
+                        color: process.color
+                    });
+                    
+                    currentTime += process.burstTime;
+                    process.completionTime = currentTime;
+                    process.turnaroundTime = process.completionTime - process.arrivalTime;
+                }
+                
+                return { ganttChart, processes: this.processes };
+            }
+        }
 
-const visualizer = new SchedulerVisualizer();
-visualizer.main().catch(err => console.error(err));
+        class SJFScheduler {
+            constructor(processes) {
+                this.processes = processes.map(p => ({
+                    ...p,
+                    remainingTime: p.burstTime,
+                    responseTime: -1,
+                    completionTime: 0,
+                    turnaroundTime: 0
+                }));
+            }
+            
+            schedule() {
+                let currentTime = 0;
+                const ganttChart = [];
+                const completed = [];
+                const readyQueue = [];
+                
+                while (completed.length < this.processes.length) {
+                    this.processes.forEach(p => {
+                        if (p.arrivalTime <= currentTime && !completed.includes(p) && !readyQueue.includes(p) && p.remainingTime > 0) {
+                            readyQueue.push(p);
+                        }
+                    });
+                    
+                    if (readyQueue.length === 0) {
+                        currentTime++;
+                        continue;
+                    }
+                    
+                    readyQueue.sort((a, b) => a.remainingTime - b.remainingTime);
+                    const process = readyQueue.shift();
+                    
+                    if (process.responseTime === -1) {
+                        process.responseTime = currentTime - process.arrivalTime;
+                    }
+                    
+                    ganttChart.push({
+                        process: process.id,
+                        start: currentTime,
+                        end: currentTime + process.remainingTime,
+                        color: process.color
+                    });
+                    
+                    currentTime += process.remainingTime;
+                    process.remainingTime = 0;
+                    process.completionTime = currentTime;
+                    process.turnaroundTime = process.completionTime - process.arrivalTime;
+                    completed.push(process);
+                }
+                
+                return { ganttChart, processes: this.processes };
+            }
+        }
+
+        class SRTFScheduler {
+            constructor(processes) {
+                this.processes = processes.map(p => ({
+                    ...p,
+                    remainingTime: p.burstTime,
+                    responseTime: -1,
+                    completionTime: 0,
+                    turnaroundTime: 0
+                }));
+            }
+
+            schedule() {
+                let currentTime = 0;
+                const ganttChart = [];
+                const completed = [];
+                let lastProcessId = null;
+                let lastStartTime = null;
+
+                while (completed.length < this.processes.length) {
+                    const readyQueue = this.processes.filter(p =>
+                        p.arrivalTime <= currentTime &&
+                        p.remainingTime > 0 &&
+                        !completed.includes(p)
+                    );
+
+                    if (readyQueue.length === 0) {
+                        currentTime++;
+                        continue;
+                    }
+
+                    readyQueue.sort((a, b) => a.remainingTime - b.remainingTime);
+                    const process = readyQueue[0];
+
+                    if (process.responseTime === -1) {
+                        process.responseTime = currentTime - process.arrivalTime;
+                    }
+
+                    if (lastProcessId === process.id) {
+                        ganttChart[ganttChart.length - 1].end = currentTime + 1;
+                    } else {
+                        if (lastProcessId !== null) {
+                            ganttChart.push({
+                                process: process.id,
+                                start: currentTime,
+                                end: currentTime + 1,
+                                color: process.color
+                            });
+                        } else {
+                            ganttChart.push({
+                                process: process.id,
+                                start: currentTime,
+                                end: currentTime + 1,
+                                color: process.color
+                            });
+                        }
+                        lastProcessId = process.id;
+                    }
+
+                    process.remainingTime--;
+                    currentTime++;
+
+                    if (process.remainingTime === 0) {
+                        process.completionTime = currentTime;
+                        process.turnaroundTime = process.completionTime - process.arrivalTime;
+                        completed.push(process);
+                        lastProcessId = null;
+                    }
+                }
+
+                return { ganttChart, processes: this.processes };
+            }
+        }
+
+        class RoundRobinScheduler {
+            constructor(processes, timeSlice) {
+                this.processes = processes.map(p => ({
+                    ...p,
+                    remainingTime: p.burstTime,
+                    responseTime: -1,
+                    completionTime: 0,
+                    turnaroundTime: 0
+                }));
+                this.timeSlice = timeSlice;
+            }
+
+            schedule() {
+                let currentTime = 0;
+                const ganttChart = [];
+                const queue = [];
+                const completed = [];
+                const arrived = new Set();
+
+                // Initial population of queue with processes that arrive at time 0
+                this.processes.forEach(p => {
+                    if (p.arrivalTime <= currentTime) {
+                        queue.push(p);
+                        arrived.add(p);
+                    }
+                });
+
+                while (completed.length < this.processes.length) {
+                    if (queue.length === 0) {
+                        currentTime++;
+                        // Check for new arrivals
+                        this.processes.forEach(p => {
+                            if (p.arrivalTime === currentTime && !arrived.has(p)) {
+                                queue.push(p);
+                                arrived.add(p);
+                            }
+                        });
+                        continue;
+                    }
+
+                    const process = queue.shift();
+
+                    if (process.responseTime === -1) {
+                        process.responseTime = currentTime - process.arrivalTime;
+                    }
+
+                    const execTime = Math.min(this.timeSlice, process.remainingTime);
+                    
+                    // Check if we can merge with previous entry
+                    if (ganttChart.length > 0 && 
+                        ganttChart[ganttChart.length - 1].process === process.id &&
+                        ganttChart[ganttChart.length - 1].end === currentTime) {
+                        ganttChart[ganttChart.length - 1].end += execTime;
+                    } else {
+                        ganttChart.push({
+                            process: process.id,
+                            start: currentTime,
+                            end: currentTime + execTime,
+                            color: process.color
+                        });
+                    }
+
+                    process.remainingTime -= execTime;
+                    currentTime += execTime;
+
+                    // Check for new arrivals during this execution
+                    this.processes.forEach(p => {
+                        if (p.arrivalTime > (currentTime - execTime) && 
+                            p.arrivalTime <= currentTime && 
+                            !arrived.has(p)) {
+                            queue.push(p);
+                            arrived.add(p);
+                        }
+                    });
+
+                    if (process.remainingTime === 0) {
+                        process.completionTime = currentTime;
+                        process.turnaroundTime = process.completionTime - process.arrivalTime;
+                        completed.push(process);
+                    } else {
+                        queue.push(process);
+                    }
+                }
+
+                return { ganttChart, processes: this.processes };
+            }
+        }
+
+        class MLFQScheduler {
+            constructor(processes, boostTime = 20, quanta = [4, 8, 16, 32], allotments = [8, 16, 32, 64]) {
+                this.queues = [
+                    { quantum: quanta[0], processes: [] },
+                    { quantum: quanta[1], processes: [] },
+                    { quantum: quanta[2], processes: [] },
+                    { quantum: quanta[3], processes: [] }
+                ];
+                this.allotments = allotments;
+                this.processes = processes.map(p => ({
+                    ...p,
+                    remainingTime: p.burstTime,
+                    queueLevel: 0,
+                    responseTime: -1,
+                    completionTime: 0,
+                    turnaroundTime: 0,
+                    timeInQueue: 0,
+                    allotmentUsed: 0
+                }));
+                this.completed = [];
+                this.boostTime = boostTime;
+                this.lastBoost = 0;
+            }
+
+            schedule() {
+                let currentTime = 0;
+                const ganttChart = [];
+                const arrived = new Set();
+
+                while (this.completed.length < this.processes.length) {
+                    // Priority boost
+                    if (currentTime - this.lastBoost >= this.boostTime && currentTime !== 0) {
+                        for (let i = 1; i < this.queues.length; i++) {
+                            while (this.queues[i].processes.length > 0) {
+                                const proc = this.queues[i].processes.shift();
+                                proc.queueLevel = 0;
+                                proc.timeInQueue = 0;
+                                proc.allotmentUsed = 0;
+                                this.queues[0].processes.push(proc);
+                            }
+                        }
+                        this.lastBoost = currentTime;
+                    }
+
+                    // Check for new arrivals
+                    this.processes.forEach(p => {
+                        if (p.arrivalTime <= currentTime && !arrived.has(p) && p.remainingTime > 0) {
+                            this.queues[0].processes.push(p);
+                            arrived.add(p);
+                        }
+                    });
+
+                    // Find the highest priority non-empty queue
+                    let queueIdx = this.queues.findIndex(q => q.processes.length > 0);
+                    if (queueIdx === -1) {
+                        currentTime++;
+                        continue;
+                    }
+
+                    const queue = this.queues[queueIdx];
+                    const process = queue.processes.shift();
+
+                    if (process.responseTime === -1) {
+                        process.responseTime = currentTime - process.arrivalTime;
+                    }
+
+                    // Calculate execution time
+                    const remainingAllotment = this.allotments[queueIdx] - process.allotmentUsed;
+                    const execTime = Math.min(
+                        queue.quantum,
+                        process.remainingTime,
+                        remainingAllotment
+                    );
+
+                    // Add to Gantt chart
+                    if (ganttChart.length > 0 &&
+                        ganttChart[ganttChart.length - 1].process === process.id &&
+                        ganttChart[ganttChart.length - 1].end === currentTime &&
+                        ganttChart[ganttChart.length - 1].queue === queueIdx) {
+                        ganttChart[ganttChart.length - 1].end += execTime;
+                    } else {
+                        ganttChart.push({
+                            process: process.id,
+                            start: currentTime,
+                            end: currentTime + execTime,
+                            queue: queueIdx,
+                            color: queueColors[queueIdx] // Use queue color instead of process color
+                        });
+                    }
+
+                    // Update process and system state
+                    process.remainingTime -= execTime;
+                    process.timeInQueue += execTime;
+                    process.allotmentUsed += execTime;
+                    currentTime += execTime;
+
+                    // Check for new arrivals during this execution
+                    this.processes.forEach(p => {
+                        if (p.arrivalTime > (currentTime - execTime) &&
+                            p.arrivalTime <= currentTime &&
+                            !arrived.has(p) &&
+                            p.remainingTime > 0) {
+                            this.queues[0].processes.push(p);
+                            arrived.add(p);
+                        }
+                    });
+
+                    if (process.remainingTime === 0) {
+                        process.completionTime = currentTime;
+                        process.turnaroundTime = process.completionTime - process.arrivalTime;
+                        this.completed.push(process);
+                    } else {
+                        if (process.allotmentUsed >= this.allotments[queueIdx] && queueIdx < this.queues.length - 1) {
+                            // Demote to lower priority queue
+                            process.queueLevel = queueIdx + 1;
+                            process.timeInQueue = 0;
+                            process.allotmentUsed = 0;
+                            this.queues[queueIdx + 1].processes.push(process);
+                        } else {
+                            // Return to same queue
+                            this.queues[queueIdx].processes.push(process);
+                        }
+                    }
+                }
+
+                return { ganttChart, processes: this.processes };
+            }
+        }
+
+        class SchedulerVisualizer {
+            constructor() {
+                this.processes = [];
+                this.simulationSpeed = 1.0;
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('input-type').addEventListener('change', (e) => {
+                    this.toggleInputType(e.target.value);
+                });
+
+                document.getElementById('algorithm').addEventListener('change', (e) => {
+                    this.toggleAlgorithmControls(e.target.value);
+                });
+
+                document.getElementById('generate-processes').addEventListener('click', () => {
+                    this.generateProcesses();
+                });
+
+                document.getElementById('clear-processes').addEventListener('click', () => {
+                    this.clearProcesses();
+                });
+
+                document.getElementById('simulate').addEventListener('click', () => {
+                    this.runSimulation();
+                });
+
+                document.getElementById('reset').addEventListener('click', () => {
+                    this.resetAll();
+                });
+            }
+
+            toggleInputType(type) {
+                document.getElementById('action-message').textContent = 
+                    type === 'manual' ? 'Ready for manual input' : 'Ready to generate random processes';
+            }
+
+            toggleAlgorithmControls(algorithm) {
+                document.getElementById('rr-controls').style.display = 'none';
+                document.getElementById('mlfq-controls').style.display = 'none';
+                document.getElementById('queue-legend').style.display = 'none';
+
+                if (algorithm === 'rr') {
+                    document.getElementById('rr-controls').style.display = 'block';
+                } else if (algorithm === 'mlfq') {
+                    document.getElementById('mlfq-controls').style.display = 'block';
+                    document.getElementById('queue-legend').style.display = 'flex';
+                }
+            }
+
+            generateProcesses() {
+                const inputType = document.getElementById('input-type').value;
+                const count = parseInt(document.getElementById('process-count').value);
+
+                if (isNaN(count) || count <= 0) {
+                    document.getElementById('action-message').textContent = 'Invalid number of processes';
+                    return;
+                }
+
+                this.clearProcessTable();
+
+                if (inputType === 'random') {
+                    this.generateRandomProcesses(count);
+                } else {
+                    this.prepareManualInputTable(count);
+                }
+            }
+
+            clearProcessTable() {
+                const tableBody = document.getElementById('process-table');
+                tableBody.innerHTML = '';
+                this.processes = [];
+            }
+
+            generateRandomProcesses(count) {
+                const tableBody = document.getElementById('process-table');
+                
+                for (let i = 0; i < count; i++) {
+                    const arrival = Math.floor(Math.random() * 10);
+                    const burst = Math.floor(Math.random() * 10) + 1;
+                    const priority = Math.floor(Math.random() * 5);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${i + 1}</td>
+                        <td>P${i}</td>
+                        <td>${arrival}</td>
+                        <td>${burst}</td>
+                        <td>${priority}</td>
+                    `;
+                    tableBody.appendChild(row);
+                    
+                    const process = new Process(i, arrival, burst);
+                    process.priorityLevel = priority;
+                    this.processes.push(process);
+                }
+                
+                document.getElementById('action-message').textContent = `Generated ${count} random processes`;
+            }
+
+            prepareManualInputTable(count) {
+                const tableBody = document.getElementById('process-table');
+                
+                for (let i = 0; i < count; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${i + 1}</td>
+                        <td>P${i}</td>
+                        <td><input type="number" min="0" class="arrival-time" value="0"></td>
+                        <td><input type="number" min="1" class="burst-time" value="1"></td>
+                        <td><input type="number" min="0" class="priority" value="0"></td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+                
+                document.getElementById('action-message').textContent = `Please enter process details for ${count} processes`;
+            }
+
+            clearProcesses() {
+                this.clearProcessTable();
+                document.getElementById('action-message').textContent = 'Process table cleared';
+            }
+
+            runSimulation() {
+                const inputType = document.getElementById('input-type').value;
+                
+                if (inputType === 'manual') {
+                    this.collectManualInputData();
+                }
+                
+                if (this.processes.length === 0) {
+                    document.getElementById('action-message').textContent = 'No processes to simulate';
+                    return;
+                }
+
+                const algorithm = document.getElementById('algorithm').value;
+                let scheduler;
+
+                switch (algorithm) {
+                    case 'fifo':
+                        scheduler = new FIFOScheduler(this.processes);
+                        break;
+                    case 'sjf':
+                        scheduler = new SJFScheduler(this.processes);
+                        break;
+                    case 'srtf':
+                        scheduler = new SRTFScheduler(this.processes);
+                        break;
+                    case 'rr':
+                        const quantum = parseInt(document.getElementById('quantum').value);
+                        scheduler = new RoundRobinScheduler(this.processes, quantum);
+                        break;
+                    case 'mlfq':
+                        const boostTime = parseInt(document.getElementById('boost-time').value);
+                        const quanta = [
+                            parseInt(document.querySelectorAll('.mlfq-quantum')[0].value),
+                            parseInt(document.querySelectorAll('.mlfq-quantum')[1].value),
+                            parseInt(document.querySelectorAll('.mlfq-quantum')[2].value),
+                            parseInt(document.querySelectorAll('.mlfq-quantum')[3].value)
+                        ];
+                        const allotments = [
+                            parseInt(document.querySelectorAll('.mlfq-allotment')[0].value),
+                            parseInt(document.querySelectorAll('.mlfq-allotment')[1].value),
+                            parseInt(document.querySelectorAll('.mlfq-allotment')[2].value),
+                            parseInt(document.querySelectorAll('.mlfq-allotment')[3].value)
+                        ];
+                        scheduler = new MLFQScheduler(this.processes, boostTime, quanta, allotments);
+                        break;
+                    default:
+                        document.getElementById('action-message').textContent = 'Invalid algorithm selected';
+                        return;
+                }
+
+                const result = scheduler.schedule();
+                this.displayResults(result);
+            }
+
+            collectManualInputData() {
+                const rows = document.getElementById('process-table').rows;
+                this.processes = [];
+                
+                for (let i = 0; i < rows.length; i++) {
+                    const cells = rows[i].cells;
+                    const arrival = parseInt(cells[2].querySelector('input').value);
+                    const burst = parseInt(cells[3].querySelector('input').value);
+                    const priority = parseInt(cells[4].querySelector('input').value);
+                    
+                    if (isNaN(arrival) || isNaN(burst) || burst <= 0) {
+                        document.getElementById('action-message').textContent = `Invalid input for process P${i}`;
+                        return;
+                    }
+                    
+                    const process = new Process(i, arrival, burst);
+                    process.priorityLevel = priority;
+                    this.processes.push(process);
+                }
+            }
+
+            displayResults(result) {
+                this.displayGanttChart(result.ganttChart);
+                this.displayMetrics(result.processes);
+                this.updateProgress(100);
+            }
+
+            displayGanttChart(ganttChart) {
+                const ganttContainer = document.getElementById('gantt-chart');
+                ganttContainer.innerHTML = '';
+                
+                if (ganttChart.length === 0) {
+                    ganttContainer.innerHTML = '<p>No Gantt chart data available</p>';
+                    return;
+                }
+
+                ganttChart.forEach(entry => {
+                    const duration = entry.end - entry.start;
+                    const box = document.createElement('div');
+                    box.className = 'gantt-box';
+                    box.textContent = `P${entry.process}`;
+                    box.style.width = `${duration * 30}px`;
+                    box.style.backgroundColor = entry.color;
+                    box.title = `P${entry.process} (${duration} units)`;
+                    
+                    if (entry.queue !== undefined) {
+                        box.textContent += ` Q${entry.queue}`;
+                    }
+                    
+                    ganttContainer.appendChild(box);
+                });
+            }
+
+            displayMetrics(processes) {
+                let totalTAT = 0;
+                let totalWT = 0;
+                let totalResp = 0;
+                let totalExec = 0;
+
+                // Clear previous metrics
+                const metricsBody = document.getElementById('metrics-body');
+                metricsBody.innerHTML = '';
+
+                processes.forEach(p => {
+                    const waitingTime = (p.completionTime - p.arrivalTime) - p.burstTime;
+                    totalTAT += p.turnaroundTime;
+                    totalWT += waitingTime;
+                    totalResp += p.responseTime;
+                    totalExec = Math.max(totalExec, p.completionTime);
+
+                    // Add row to metrics table
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>P${p.id}</td>
+                        <td>${p.arrivalTime}</td>
+                        <td>${p.burstTime}</td>
+                        <td>${p.completionTime}</td>
+                        <td>${p.turnaroundTime}</td>
+                        <td>${p.responseTime}</td>
+                    `;
+                    metricsBody.appendChild(row);
+                });
+
+                const avgWT = totalWT / processes.length;
+                const avgTAT = totalTAT / processes.length;
+                const avgResp = totalResp / processes.length;
+
+                document.getElementById('avg-wait').textContent = avgWT.toFixed(2);
+                document.getElementById('avg-tat').textContent = avgTAT.toFixed(2);
+                document.getElementById('total-exec').textContent = totalExec;
+                
+                // Update average metrics in table footer
+                document.getElementById('avg-tat-cell').textContent = avgTAT.toFixed(2);
+                document.getElementById('avg-resp-cell').textContent = avgResp.toFixed(2);
+            }
+
+            updateProgress(percent) {
+                document.getElementById('progress-bar').value = percent;
+                document.getElementById('progress-percent').textContent = `${percent}%`;
+                document.getElementById('cpu-status').textContent = percent === 100 ? 'Idle' : 'Running';
+            }
+
+            resetAll() {
+                this.processes = [];
+                document.getElementById('process-table').innerHTML = '';
+                document.getElementById('gantt-chart').innerHTML = 'No simulation data available. Run simulation to see results.';
+                document.getElementById('metrics-body').innerHTML = '';
+                
+                document.getElementById('avg-wait').textContent = '--';
+                document.getElementById('avg-tat').textContent = '--';
+                document.getElementById('total-exec').textContent = '--';
+                document.getElementById('avg-tat-cell').textContent = '--';
+                document.getElementById('avg-resp-cell').textContent = '--';
+                
+                document.getElementById('progress-bar').value = 0;
+                document.getElementById('progress-percent').textContent = '0%';
+                document.getElementById('cpu-status').textContent = '--';
+                document.getElementById('next-queue').textContent = '--';
+                
+                document.getElementById('action-message').textContent = 'Ready to simulate';
+                document.getElementById('queue-legend').style.display = 'none';
+            }
+        }
+
+        // Initialize the visualizer when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const visualizer = new SchedulerVisualizer();
+        });
     </script>
 </body>
 </html>
