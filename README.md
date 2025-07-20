@@ -6,7 +6,7 @@ Instructions:
 2. Enter the number of processes (numbers must be positive).
 3. In this part, you need to provide data. If you choose A, you will be asked to to enter the arrival and and burst time on a process. If you choose B, the program will randomly generate arrival and burst times.
 
-What are the scheduling process presemt?
+What are the scheduling process present?
 1. FIFO (First-In, First-Out)
 Type: Non-preemptive
 Description: Processes are executed in the order they arrive. Once a process starts running, it finishes before the next one begins.
