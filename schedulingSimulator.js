@@ -1,5 +1,3 @@
-const readline = require('readline');
-
 class Process {
     constructor(id, arrivalTime, burstTime) {
         this.id = id;
@@ -142,11 +140,82 @@ class SchedulerVisualizer {
     }
 
     async renderGanttChart(ganttChart) {
-        for (const entry of ganttChart) {
-            console.log(`P${entry.process} [${entry.start}-${entry.end}]`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+     // Get total duration of simulation
+    const totalTime = Math.max(...ganttChart.map(entry => entry.end));
+
+    // Build a time → process map (including queue if MLFQ)
+    const timeline = new Map();
+    ganttChart.forEach(entry => {
+        for (let t = entry.start; t < entry.end; t++) {
+            const label = entry.queue !== undefined
+                ? `P${entry.process} (Q${entry.queue})`
+                : `P${entry.process}`;
+            timeline.set(t, label);
         }
+    });
+
+    console.log("\nSimulated Gantt Chart Timeline:");
+    console.log("Time\tProcess");
+
+    for (let t = 0; t <= totalTime; t++) {
+        const process = timeline.get(t) || "IDLE";
+        console.log(`  ${t}\t[${process}]`);
+        await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay = 0.5s per tick
     }
+
+    console.log("");
+    }
+
+async displayGanttChart(ganttChart) {
+    const ganttContainer = document.getElementById('gantt-chart');
+    ganttContainer.innerHTML = '';
+    
+    if (ganttChart.length === 0) {
+        ganttContainer.innerHTML = '<p>No Gantt chart data available</p>';
+        return;
+    }
+
+    // Build a full timeline: time → process
+    const timeline = new Map();
+    let maxTime = 0;
+
+    ganttChart.forEach(entry => {
+        for (let t = entry.start; t < entry.end; t++) {
+            timeline.set(t, entry);
+            maxTime = Math.max(maxTime, entry.end);
+        }
+    });
+
+    document.getElementById('action-message').textContent = 'Simulating...';
+    document.getElementById('cpu-status').textContent = 'Running';
+
+    for (let t = 0; t < maxTime; t++) {
+        const box = document.createElement('div');
+        box.className = 'gantt-box';
+
+        const entry = timeline.get(t);
+        if (entry) {
+            box.textContent = `P${entry.process}`;
+            box.style.backgroundColor = entry.color;
+            box.title = `P${entry.process} (time ${t})`;
+            if (entry.queue !== undefined) {
+                box.textContent += ` Q${entry.queue}`;
+            }
+        } else {
+            box.textContent = 'IDLE';
+            box.style.backgroundColor = '#555';
+            box.title = `IDLE (time ${t})`;
+        }
+
+        box.style.width = '30px'; // 1 time unit = 30px
+        ganttContainer.appendChild(box);
+
+        await new Promise(res => setTimeout(res, 300)); // simulate animation delay
+    }
+
+    document.getElementById('action-message').textContent = 'Simulation complete.';
+    document.getElementById('cpu-status').textContent = 'Idle';
+}
 
     printMetrics(processes) {
         console.log("\nProcess Metrics:");
@@ -162,6 +231,66 @@ class SchedulerVisualizer {
         console.log(`\nAverage Turnaround Time: ${avgTAT.toFixed(2)}`);
         console.log(`Average Response Time: ${avgRT.toFixed(2)}`);
     }
+
+
+generateRandomProcesses(count) {
+    const tableBody = document.getElementById('process-table');
+    
+    for (let i = 0; i < count; i++) {
+        const arrival = Math.floor(Math.random() * 10);
+        const burst = Math.floor(Math.random() * 10) + 1;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>P${i}</td>
+            <td>${arrival}</td>
+            <td>${burst}</td>
+        `;
+        tableBody.appendChild(row);
+        
+        const process = new Process(i, arrival, burst);
+        this.processes.push(process);
+    }
+    
+    document.getElementById('action-message').textContent = `Generated ${count} random processes`;
+}
+prepareManualInputTable(count) {
+    const tableBody = document.getElementById('process-table');
+    
+    for (let i = 0; i < count; i++) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>P${i}</td>
+            <td><input type="number" min="0" class="arrival-time" value="0"></td>
+            <td><input type="number" min="1" class="burst-time" value="1"></td>
+        `;
+        tableBody.appendChild(row);
+    }
+    
+    document.getElementById('action-message').textContent = `Please enter process details for ${count} processes`;
+}
+
+collectManualInputData() {
+    const rows = document.getElementById('process-table').rows;
+    this.processes = [];
+    
+    for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].cells;
+        const arrival = parseInt(cells[2].querySelector('input').value);
+        const burst = parseInt(cells[3].querySelector('input').value);
+        
+        if (isNaN(arrival) || isNaN(burst) || burst <= 0) {
+            document.getElementById('action-message').textContent = `Invalid input for process P${i}`;
+            return;
+        }
+        
+        const process = new Process(i, arrival, burst);
+        this.processes.push(process);
+    }
+}
+
 }
 
 class FIFOScheduler {
