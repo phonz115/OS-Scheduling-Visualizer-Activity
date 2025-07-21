@@ -394,8 +394,7 @@
                             <th>#</th>
                             <th>Process</th>
                             <th>Arrival Time</th>
-                            <th>Exec. Time</th>
-                            <th>Priority</th>
+                            <th>Burst Time</th>
                         </tr>
                     </thead>
                     <tbody id="process-table">
@@ -505,6 +504,12 @@
             <div class="gantt-chart" id="gantt-chart">
                 No simulation data available. Run simulation to see results.
             </div>
+
+   <div class="input-group">
+        <label for="sim-speed">Simulation Speed:</label>
+        <input type="range" id="sim-speed" min="0.1" max="2" step="0.1" value="1" style="width: 120px;">
+        <span id="sim-speed-value">1x</span>
+    </div>
             
             <h3>PROCESS METRICS</h3>
             <table id="metrics-table">
@@ -598,8 +603,6 @@
                 this.completionTime = 0;
                 this.turnaroundTime = 0;
                 this.responseTime = -1;
-                this.priorityLevel = 0;
-                this.timeInQueue = 0;
                 this.color = processColors[id % processColors.length];
             }
         }
@@ -1063,7 +1066,6 @@
                 for (let i = 0; i < count; i++) {
                     const arrival = Math.floor(Math.random() * 10);
                     const burst = Math.floor(Math.random() * 10) + 1;
-                    const priority = Math.floor(Math.random() * 5);
                     
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -1071,12 +1073,10 @@
                         <td>P${i}</td>
                         <td>${arrival}</td>
                         <td>${burst}</td>
-                        <td>${priority}</td>
                     `;
                     tableBody.appendChild(row);
                     
                     const process = new Process(i, arrival, burst);
-                    process.priorityLevel = priority;
                     this.processes.push(process);
                 }
                 
@@ -1093,7 +1093,6 @@
                         <td>P${i}</td>
                         <td><input type="number" min="0" class="arrival-time" value="0"></td>
                         <td><input type="number" min="1" class="burst-time" value="1"></td>
-                        <td><input type="number" min="0" class="priority" value="0"></td>
                     `;
                     tableBody.appendChild(row);
                 }
@@ -1168,7 +1167,6 @@
                     const cells = rows[i].cells;
                     const arrival = parseInt(cells[2].querySelector('input').value);
                     const burst = parseInt(cells[3].querySelector('input').value);
-                    const priority = parseInt(cells[4].querySelector('input').value);
                     
                     if (isNaN(arrival) || isNaN(burst) || burst <= 0) {
                         document.getElementById('action-message').textContent = `Invalid input for process P${i}`;
@@ -1176,7 +1174,6 @@
                     }
                     
                     const process = new Process(i, arrival, burst);
-                    process.priorityLevel = priority;
                     this.processes.push(process);
                 }
             }
