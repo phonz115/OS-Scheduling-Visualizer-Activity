@@ -39,39 +39,39 @@ Known bugs, limitations or incomplete features:
 1. Mixing of CLI and DOM-based Code
 The methods generateRandomProcesses(), prepareManualInputTable(), and collectManualInputData() are designed for a web-based HTML interface, not for a Node.js CLI terminal.
 
-2. ⚠️ Incorrect Response Time Tracking in SRTF / RR / MLFQ
+   2.  Incorrect Response Time Tracking in SRTF / RR / MLFQ
 responseTime is only set when a process is first picked, not when it first runs. This is fine for most cases, but:
 
-3. 🔁 Process Arrival Not Rechecked Thoroughly
+    Process Arrival Not Rechecked Thoroughly
 In Round Robin and MLFQ, process arrivals are checked only after each execution, not continuously per time unit.
 
-4. 📉 MLFQ Gantt Chart Inconsistency
+4. MLFQ Gantt Chart Inconsistency
 The ganttChart output contains queue information in some places (for MLFQ), but the base renderGanttChart() method in SchedulerVisualizer only expects process, start, end.
 
-5. ❓ Missing Edge Case Handling
+5.  Missing Edge Case Handling
 No handling of:
 Processes with same arrival and burst time.
 Large burst times in RR or MLFQ which can break the quantum system.
 No processes at all (e.g., n = 0 case, though mostly handled).
 
 
-🧱 Limitations / Incomplete Features
-1. 📊 No GUI / Web UI Support
+ Limitations / Incomplete Features
+1.  No GUI / Web UI Support
 Some methods hint at DOM interaction (e.g., generateRandomProcesses), but the rest of the system runs in CLI.
 
-2. 🎞️ No Animation / Timeline Visuals
+2. No Animation / Timeline Visuals
 Gantt chart is printed textually:
 
-3. ⌛ No Wait Time or CPU Utilization Calculation
+3. No Wait Time or CPU Utilization Calculation
 Metrics shown: Arrival, Burst, Completion, TAT, RT
 
 Missing:
 Waiting Time (WT): = Turnaround - Burst
 CPU Utilization
 
-4. 🔄 No Restart / Retry / Menu Loop
+4. No Restart / Retry / Menu Loop
 
-5. 🧪 No Test or Debug Mode
+5. No Test or Debug Mode
 Lacks logging of internal state (queue contents, demotions, boosts, etc.).
 
 
