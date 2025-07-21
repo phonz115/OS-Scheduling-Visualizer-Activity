@@ -1,3 +1,5 @@
+const readline = require('readline');
+
 class Process {
     constructor(id, arrivalTime, burstTime) {
         this.id = id;
@@ -7,7 +9,6 @@ class Process {
         this.completionTime = 0;
         this.turnaroundTime = 0;
         this.responseTime = -1;
-        this.priorityLevel = 0;
         this.timeInQueue = 0;
     }
 }
@@ -140,82 +141,11 @@ class SchedulerVisualizer {
     }
 
     async renderGanttChart(ganttChart) {
-     // Get total duration of simulation
-    const totalTime = Math.max(...ganttChart.map(entry => entry.end));
-
-    // Build a time → process map (including queue if MLFQ)
-    const timeline = new Map();
-    ganttChart.forEach(entry => {
-        for (let t = entry.start; t < entry.end; t++) {
-            const label = entry.queue !== undefined
-                ? `P${entry.process} (Q${entry.queue})`
-                : `P${entry.process}`;
-            timeline.set(t, label);
+        for (const entry of ganttChart) {
+            console.log(`P${entry.process} [${entry.start}-${entry.end}]`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
-    });
-
-    console.log("\nSimulated Gantt Chart Timeline:");
-    console.log("Time\tProcess");
-
-    for (let t = 0; t <= totalTime; t++) {
-        const process = timeline.get(t) || "IDLE";
-        console.log(`  ${t}\t[${process}]`);
-        await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay = 0.5s per tick
     }
-
-    console.log("");
-    }
-
-async displayGanttChart(ganttChart) {
-    const ganttContainer = document.getElementById('gantt-chart');
-    ganttContainer.innerHTML = '';
-    
-    if (ganttChart.length === 0) {
-        ganttContainer.innerHTML = '<p>No Gantt chart data available</p>';
-        return;
-    }
-
-    // Build a full timeline: time → process
-    const timeline = new Map();
-    let maxTime = 0;
-
-    ganttChart.forEach(entry => {
-        for (let t = entry.start; t < entry.end; t++) {
-            timeline.set(t, entry);
-            maxTime = Math.max(maxTime, entry.end);
-        }
-    });
-
-    document.getElementById('action-message').textContent = 'Simulating...';
-    document.getElementById('cpu-status').textContent = 'Running';
-
-    for (let t = 0; t < maxTime; t++) {
-        const box = document.createElement('div');
-        box.className = 'gantt-box';
-
-        const entry = timeline.get(t);
-        if (entry) {
-            box.textContent = `P${entry.process}`;
-            box.style.backgroundColor = entry.color;
-            box.title = `P${entry.process} (time ${t})`;
-            if (entry.queue !== undefined) {
-                box.textContent += ` Q${entry.queue}`;
-            }
-        } else {
-            box.textContent = 'IDLE';
-            box.style.backgroundColor = '#555';
-            box.title = `IDLE (time ${t})`;
-        }
-
-        box.style.width = '30px'; // 1 time unit = 30px
-        ganttContainer.appendChild(box);
-
-        await new Promise(res => setTimeout(res, 300)); // simulate animation delay
-    }
-
-    document.getElementById('action-message').textContent = 'Simulation complete.';
-    document.getElementById('cpu-status').textContent = 'Idle';
-}
 
     printMetrics(processes) {
         console.log("\nProcess Metrics:");
