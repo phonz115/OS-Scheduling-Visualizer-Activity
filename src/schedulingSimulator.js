@@ -162,6 +162,66 @@ class SchedulerVisualizer {
         console.log(`\nAverage Turnaround Time: ${avgTAT.toFixed(2)}`);
         console.log(`Average Response Time: ${avgRT.toFixed(2)}`);
     }
+
+
+generateRandomProcesses(count) {
+    const tableBody = document.getElementById('process-table');
+    
+    for (let i = 0; i < count; i++) {
+        const arrival = Math.floor(Math.random() * 10);
+        const burst = Math.floor(Math.random() * 10) + 1;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>P${i}</td>
+            <td>${arrival}</td>
+            <td>${burst}</td>
+        `;
+        tableBody.appendChild(row);
+        
+        const process = new Process(i, arrival, burst);
+        this.processes.push(process);
+    }
+    
+    document.getElementById('action-message').textContent = `Generated ${count} random processes`;
+}
+prepareManualInputTable(count) {
+    const tableBody = document.getElementById('process-table');
+    
+    for (let i = 0; i < count; i++) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>P${i}</td>
+            <td><input type="number" min="0" class="arrival-time" value="0"></td>
+            <td><input type="number" min="1" class="burst-time" value="1"></td>
+        `;
+        tableBody.appendChild(row);
+    }
+    
+    document.getElementById('action-message').textContent = `Please enter process details for ${count} processes`;
+}
+
+collectManualInputData() {
+    const rows = document.getElementById('process-table').rows;
+    this.processes = [];
+    
+    for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].cells;
+        const arrival = parseInt(cells[2].querySelector('input').value);
+        const burst = parseInt(cells[3].querySelector('input').value);
+        
+        if (isNaN(arrival) || isNaN(burst) || burst <= 0) {
+            document.getElementById('action-message').textContent = `Invalid input for process P${i}`;
+            return;
+        }
+        
+        const process = new Process(i, arrival, burst);
+        this.processes.push(process);
+    }
+}
+
 }
 
 class FIFOScheduler {
