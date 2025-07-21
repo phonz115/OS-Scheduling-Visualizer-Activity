@@ -18,7 +18,7 @@ Description: Chooses the process with the shortest burst time among the ready pr
 Best For: Systems where process lengths are known in advance.
 Limitation: It can cause starvation.
 
-SRTF (Shortest Remaining Time First)
+3. SRTF (Shortest Remaining Time First)
 Type: Preemptive
 Description: A variation of SJF where the CPU is given to the process with the shortest remaining burst time. It can preempt the currently running process if a shorter one arrives.
 Best For: Systems needing fast turnaround for short jobs.
